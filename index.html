@@ -3,69 +3,266 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f6b4f">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
 <title>تاسلوجە دلیڤەری</title>
-<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--gold:#b8963e;--gold-d:#8f7230;--bg:#faf6ee;--card:#ffffff;--ink:#2b2418;--mute:#7a6f5c;--line:#eadfc6;
-box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1b1710;--card:#272016;--ink:#f3ead6;--mute:#b3a688;--line:#3a3022}}
-:root[data-theme="dark"]{--bg:#1b1710;--card:#272016;--ink:#f3ead6;--mute:#b3a688;--line:#3a3022}
-*{box-sizing:border-box}
-html{scroll-padding-top:env(safe-area-inset-top,0px)}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:'Vazirmatn',Tahoma,sans-serif;min-height:100vh}
-header{background:var(--gold);color:#fff;padding:28px 20px 34px;border-radius:0 0 28px 28px}
-header h1{margin:0;font-size:26px;font-weight:800}
-header p{margin:6px 0 0;font-size:14px;opacity:.92}
-main{padding:22px 16px 40px;max-width:520px;margin:0 auto}
-h2{font-size:17px;margin:0 4px 14px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.tile{all:unset;box-sizing:border-box;cursor:pointer;background:var(--card);border:1.5px solid var(--line);border-radius:22px;padding:20px 12px 18px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;min-height:150px;justify-content:center;transition:transform .15s,border-color .15s}
-.tile:active{transform:scale(.97)}
-.tile:hover,.tile:focus-visible{border-color:var(--gold)}
-.tile:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
-.ico{width:64px;height:64px;border-radius:20px;background:var(--gold);display:grid;place-items:center}
-.ico svg{width:34px;height:34px;stroke:#fff;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.tile b{font-size:15px;line-height:1.5}
-#sec{display:none;padding:22px 16px;max-width:520px;margin:0 auto}
-.back{all:unset;cursor:pointer;color:var(--gold-d);font-weight:700;padding:6px 0;display:inline-block}
-.back:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
-.empty{background:var(--card);border:1.5px dashed var(--line);border-radius:22px;padding:36px 20px;text-align:center;margin-top:16px;color:var(--mute)}
-.empty h3{color:var(--ink);margin:0 0 8px}
+:root{--bg:#f6f7f3;--card:#fff;--ink:#14231c;--mut:#5f6f66;--g:#0f6b4f;--y:#f2b705;--line:#dfe5dd;--err:#b3261e;color-scheme:light}
+@media(prefers-color-scheme:dark){:root{--bg:#0f1713;--card:#18231d;--ink:#eef3ee;--mut:#9fb0a5;--g:#3fb28a;--line:#2a3a31;--err:#ff8a80;color-scheme:dark}}
+*{box-sizing:border-box;margin:0}
+html,body{background:var(--bg);color:var(--ink);font-family:Tahoma,"Noto Naskh Arabic","Segoe UI",sans-serif;line-height:1.6}
+body{padding:env(safe-area-inset-top,0) 0 calc(80px + env(safe-area-inset-bottom,0))}
+header{background:var(--g);color:#fff;padding:14px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:env(safe-area-inset-top,0);z-index:5}
+header h1{font-size:19px;flex:1}
+header button{background:none;border:0;color:#fff;font-size:22px;cursor:pointer}
+main{max-width:640px;margin:0 auto;padding:16px}
+h2{font-size:17px;margin:18px 0 8px}
+.hello{font-size:26px;font-weight:700;margin:6px 0 16px}
+.grid{display:grid;gap:12px}
+.cat{background:var(--card);border:2px solid var(--line);border-radius:18px 4px 18px 4px;padding:24px 16px;text-align:right;font:inherit;color:inherit;cursor:pointer}
+.cat:active,.cat:hover{background:var(--y);border-color:var(--y);color:#14231c}
+.cat span{font-weight:700;font-size:19px}
+.row{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.row .t{flex:1;min-width:180px}
+.row small{color:var(--mut);display:block}
+.row img{width:56px;height:56px;border-radius:10px;object-fit:cover}
+.acts{display:flex;gap:6px;flex-wrap:wrap;width:100%}
+.acts select{flex:1;margin:0;padding:6px;min-width:120px}
+.btn{background:var(--g);color:#fff;border:0;border-radius:10px;padding:10px 16px;font:inherit;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block;text-align:center}
+.btn.alt{background:var(--y);color:#14231c}
+.btn.red{background:var(--err);color:#fff}
+.btn.wa{background:#1faa59;color:#fff}
+.btn.sm{padding:6px 12px}
+.btn.full{width:100%;margin-bottom:8px}
+input,select,textarea{width:100%;font:inherit;color:inherit;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:11px;margin-bottom:10px}
+:focus-visible{outline:3px solid var(--y);outline-offset:2px}
+.empty{text-align:center;color:var(--mut);padding:30px 10px}
+.bar{position:fixed;inset:auto 12px calc(12px + env(safe-area-inset-bottom,0)) 12px;max-width:616px;margin:auto;background:var(--ink);color:var(--bg);border-radius:14px;padding:14px 16px;display:flex;justify-content:space-between;font-weight:700;cursor:pointer;z-index:6}
+.qty{display:flex;align-items:center;gap:8px}
+.qty button{width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:inherit;font-size:18px;cursor:pointer}
+.msg{padding:10px;border-radius:10px;margin-bottom:10px;background:var(--card);border:1px solid var(--line)}
+.err{color:var(--err)}
+.st{display:inline-block;padding:2px 10px;border-radius:99px;background:var(--y);color:#14231c;font-size:13px;font-weight:700}
+.st.accepted{background:#9ad7b8}.st.delivered{background:var(--g);color:#fff}.st.cancelled{background:var(--err);color:#fff}
+.big{font-size:22px;font-weight:700;margin:6px 0 14px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.tabs button{flex:1;padding:9px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:inherit;font:inherit;cursor:pointer}
+.tabs .on{background:var(--g);color:#fff;border-color:var(--g)}
+.foot{text-align:center;margin-top:28px}.foot a{color:var(--mut);font-size:13px;cursor:pointer}
 </style>
 </head>
 <body>
-<header>
-  <h1>تاسلوجە دلیڤەری</h1>
-  <p>بەخێربێیت، چیت دەوێت؟</p>
-</header>
+<header><button id="back" aria-label="گەڕانەوە" hidden>›</button><h1 id="ttl">تاسلوجە دلیڤەری</h1></header>
+<main id="app"></main>
+<div id="bar"></div>
 
-<main id="home">
-  <h2>بەشەکان</h2>
-  <div class="grid">
-    <button class="tile" data-s="food"><span class="ico"><svg viewBox="0 0 24 24"><path d="M7 3v8M4 3v5a3 3 0 0 0 6 0V3M7 11v10M17 21V3c-2.5 1.5-4 4.5-4 8h4"/></svg></span><b>دووکانەکانی خواردنەمەنی</b></button>
-    <button class="tile" data-s="taxi"><span class="ico"><svg viewBox="0 0 24 24"><path d="M5 16l1.5-5.5A2 2 0 0 1 8.4 9h7.2a2 2 0 0 1 1.9 1.5L19 16M4 16h16v3H4zM7 19v1.5M17 19v1.5M9 6h6"/><circle cx="8" cy="16" r=".6"/><circle cx="16" cy="16" r=".6"/></svg></span><b>تاکسی تاسلوجە</b></button>
-    <button class="tile" data-s="beauty"><span class="ico"><svg viewBox="0 0 24 24"><path d="M10 3h4v5h-4zM9 8h6v3H9zM8 11h8v10H8z"/></svg></span><b>کۆسمەتیک و ئافرەتان</b></button>
-    <button class="tile" data-s="other"><span class="ico"><svg viewBox="0 0 24 24"><path d="M4 9l1-5h14l1 5M4 9v11h16V9M4 9a2.7 2.7 0 0 0 5.3 0 2.7 2.7 0 0 0 5.4 0A2.7 2.7 0 0 0 20 9M10 20v-5h4v5"/></svg></span><b>دووکانەکانی تر</b></button>
-  </div>
-</main>
+<script type="module">
+import {initializeApp,deleteApp} from "https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js";
+import {getFirestore,collection,getDocs,getDoc,setDoc,addDoc,updateDoc,deleteDoc,doc,query,where,serverTimestamp,runTransaction,onSnapshot} from "https://www.gstatic.com/firebasejs/13.2.0/firebase-firestore.js";
+import {getAuth,signInWithEmailAndPassword,createUserWithEmailAndPassword,signOut,onAuthStateChanged} from "https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js";
 
-<section id="sec">
-  <button class="back" id="back">‹ گەڕانەوە</button>
-  <h2 id="st" style="margin-top:10px"></h2>
-  <div class="empty"><h3>بەم زووانە</h3>لێرە دووکانەکان دەردەکەون کاتێک ئادمین زیادیان بکات.</div>
-</section>
+/* ===== ئەمانە بگۆڕە ===== */
+const ADMIN_WA="964XXXXXXXXXX";      // ژمارەی واتسئاپی ئادمین بە کۆدی وڵات، بێ + و بێ سفر
+const ADMIN_EMAIL="YOUR@EMAIL.com";  // ئیمەیڵی ئادمین (هەمان ئیمەیڵی ناو Rules)
+/* ======================== */
 
-<script>
-var names={food:"دووکانەکانی خواردنەمەنی",taxi:"تاکسی تاسلوجە",beauty:"کۆسمەتیک و ئافرەتان",other:"دووکانەکانی تر"};
-var home=document.getElementById('home'),sec=document.getElementById('sec');
-function show(k){
-  if(k&&names[k]){home.style.display='none';sec.style.display='block';document.getElementById('st').textContent=names[k];}
-  else{sec.style.display='none';home.style.display='block';}
+const app=initializeApp({
+  apiKey:"AIzaSyDlL4wL8ZfmuhfYwABRwSB8peYW8IW67wo",
+  authDomain:"tasulja-delivery.firebaseapp.com",
+  projectId:"tasulja-delivery",
+  storageBucket:"tasulja-delivery.firebasestorage.app",
+  messagingSenderId:"549067569825",
+  appId:"1:549067569825:web:07f593443ab6a0c3a28ee0"
+});
+const db=getFirestore(app), auth=getAuth(app);
+
+const CATS=[
+ {id:"food",n:"دووکانەکانی خواردنەمەنی"},
+ {id:"taxi",n:"تەکسی تاسولجە taxi"},
+ {id:"beauty",n:"کۆسماتیک و ئافرەتان"},
+ {id:"other",n:"دووکانەکانی تر"}
+];
+const ST={new:"چاوەڕوانی شۆفێر",accepted:"شۆفێر وەریگرت، لە ڕێگایە",delivered:"گەیەندرا ✓",cancelled:"هەڵوەشێنرایەوە"};
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmt=n=>Number(n).toLocaleString("en")+" د.ع";
+const val=id=>($("#"+id)?.value||"").trim();
+const ms=x=>x?.createdAt?.toMillis?.()||Date.now();
+const wa=p=>{let d=String(p||"").replace(/\D/g,"");if(d.startsWith("0"))d="964"+d.slice(1);return "https://wa.me/"+d};
+const tel=p=>"tel:"+String(p||"").replace(/[^\d+]/g,"");
+let shops=[],drivers=[],user=null,me=null,role="",tab="live",flash="",unsubs=[];
+let cart=[];try{cart=JSON.parse(localStorage.getItem("tcart")||"[]")}catch(e){}
+const saveCart=()=>{try{localStorage.setItem("tcart",JSON.stringify(cart))}catch(e){}};
+const total=()=>cart.reduce((s,i)=>s+i.price*i.qty,0);
+const count=()=>cart.reduce((s,i)=>s+i.qty,0);
+const docs=async(col,q)=>(await getDocs(q||collection(db,col))).docs.map(d=>({id:d.id,...d.data()}));
+const set=(t,html,back)=>{document.title=t;$("#ttl").textContent=t;$("#back").hidden=!back;$("#app").innerHTML=html};
+const note=()=>{const m=flash?`<div class="msg">${flash}</div>`:"";flash="";return m};
+const stop=()=>{unsubs.forEach(u=>u());unsubs=[]};
+const beep=()=>{try{const c=new AudioContext(),o=c.createOscillator();o.connect(c.destination);o.frequency.value=880;o.start();setTimeout(()=>{o.stop();c.close()},400)}catch(e){}};
+
+function listen(qs,cb){
+  const data={};let ready=false;
+  Object.entries(qs).forEach(([k,q])=>unsubs.push(onSnapshot(q,s=>{
+    data[k]=s.docs.map(d=>({id:d.id,col:k.replace(/^m/,""),...d.data()}));
+    if(ready&&s.docChanges().some(c=>c.type==="added"))beep();
+    cb(data);
+  },e=>{$("#live").innerHTML=`<p class="empty err">${esc(e.message)}</p>`})));
+  setTimeout(()=>ready=true,1500);
 }
-document.querySelectorAll('.tile').forEach(function(b){b.addEventListener('click',function(){location.hash=b.dataset.s;});});
-document.getElementById('back').addEventListener('click',function(){location.hash='';show();});
-window.addEventListener('hashchange',function(){show(location.hash.slice(1));});
-show(location.hash.slice(1));
+const merge=(...a)=>a.flat().filter(Boolean).sort((x,y)=>ms(y)-ms(x));
+
+function card(o,m){
+  const t=o.col==="taxi",key=o.col+"/"+o.id,priv=m==="driver";
+  const body=t?`${esc(o.from)} ← ${esc(o.to)}`:`${esc(o.address)}<br>${(o.items||[]).map(i=>esc(i.name)+" × "+i.qty).join("، ")}<br><b>${fmt(o.total)}</b>`;
+  let a="";
+  if(!priv)a+=`<a class="btn wa sm" href="${wa(o.phone)}" target="_blank" rel="noopener">واتسئاپ</a><a class="btn sm" href="${tel(o.phone)}">پەیوەندی</a>`;
+  if(m==="driver")a+=`<button class="btn alt" data-accept="${key}">قبووڵکردن</button>`;
+  if(m==="mine"&&o.status==="accepted")a+=`<button class="btn alt" data-done="${key}">گەیەندرا</button>`;
+  if(m==="admin"){
+    if(o.status==="new"||o.status==="accepted")a+=`<div class="acts"><select id="d-${o.id}">${drivers.map(d=>`<option value="${d.id}">${esc(d.name)}</option>`).join("")}</select><button class="btn sm" data-assign="${key}">پێدان بە شۆفێر</button><button class="btn red sm" data-cancel="${key}">هەڵوەشاندن</button></div>`;
+    a+=`<button class="btn red sm" data-del="${key}">سڕینەوە</button>`;
+  }
+  return `<div class="row"><div class="t"><b>${t?"🚕 ":""}${esc(o.name||"—")}</b> <span class="st ${o.status}">${ST[o.status]||""}</span><small>${priv?"":`<span dir="ltr">${esc(o.phone)}</span><br>`}${body}${o.driverName?`<br>شۆفێر: ${esc(o.driverName)}`:""}</small></div>${a?`<div class="acts">${a}</div>`:""}</div>`;
+}
+
+async function render(){
+  stop();
+  const [p,...r]=(location.hash.slice(1)||"home").split("-"),arg=r.join("-");
+  try{
+    if(p==="home"){
+      const last=(()=>{try{return localStorage.getItem("tlast")}catch(e){return""}})();
+      set("تاسلوجە دلیڤەری",`${note()}<p class="hello">بەخێربێیت، چیت دەوێت؟</p><div class="grid">${CATS.map(c=>`<button class="cat" data-go="${c.id==="taxi"?"taxi":"cat-"+c.id}"><span>${c.n}</span></button>`).join("")}</div>${last?`<div class="row" data-go="track-${esc(last)}" style="cursor:pointer;margin-top:16px"><b>داواکارییە دوایینەکەم</b></div>`:""}<p class="foot"><a data-go="driver">چوونەژوورەوەی شۆفێر</a></p>`);
+    }else if(p==="cat"){
+      const c=CATS.find(x=>x.id===arg)||CATS[0];
+      set(c.n,"<p class='empty'>بارکردن...</p>",1);
+      shops=await docs("shops");
+      const l=shops.filter(s=>s.category===c.id);
+      set(c.n,l.length?l.map(s=>`<div class="row" data-go="shop-${s.id}" style="cursor:pointer">${s.img?`<img src="${esc(s.img)}" alt="">`:""}<div class="t"><b>${esc(s.name)}</b>${s.phone?`<small>${esc(s.phone)}</small>`:""}</div></div>`).join(""):`<p class="empty">هێشتا دووکان زیاد نەکراوە.<br>بەم زووانە دێن.</p>`,1);
+    }else if(p==="shop"){
+      set("...","<p class='empty'>بارکردن...</p>",1);
+      if(!shops.length)shops=await docs("shops");
+      const s=shops.find(x=>x.id===arg)||{name:"دووکان"};
+      const pr=await docs("products",query(collection(db,"products"),where("shopId","==",arg)));
+      set(s.name,pr.length?pr.map(x=>`<div class="row">${x.img?`<img src="${esc(x.img)}" alt="">`:""}<div class="t"><b>${esc(x.name)}</b><small>${fmt(x.price)}</small></div><button class="btn sm" data-add="${x.id}" data-n="${esc(x.name)}" data-p="${x.price}" data-s="${esc(s.name)}">زیادکردن</button></div>`).join(""):`<p class="empty">هێشتا بەرهەم نییە.</p>`,1);
+    }else if(p==="cart"){
+      set("سەبەتە",cart.length?`${note()}${cart.map((i,k)=>`<div class="row"><div class="t"><b>${esc(i.name)}</b><small>${esc(i.shop)} · ${fmt(i.price*i.qty)}</small></div><div class="qty"><button data-dec="${k}" aria-label="کەمکردن">−</button><b>${i.qty}</b><button data-inc="${k}" aria-label="زیادکردن">+</button></div></div>`).join("")}<h2>کۆی گشتی: ${fmt(total())}</h2><input id="n" placeholder="ناو"><input id="ph" type="tel" placeholder="ژمارەی مۆبایل"><textarea id="ad" rows="2" placeholder="ناونیشان"></textarea><button class="btn full" data-order>ناردنی داواکاری</button>`:`<p class="empty">سەبەتەکەت بەتاڵە.<br>دووکانێک هەڵبژێرە و بەرهەم زیاد بکە.</p>`,1);
+    }else if(p==="taxi"){
+      set("تەکسی تاسولجە",`<input id="n" placeholder="ناو"><input id="ph" type="tel" placeholder="ژمارەی مۆبایل"><input id="fr" placeholder="لە کوێوە؟"><input id="to" placeholder="بۆ کوێ؟"><button class="btn alt full" data-taxi>داواکردنی تەکسی</button>`,1);
+    }else if(p==="track"){track(arg)}
+    else if(p==="driver"){driverView()}
+    else if(p==="admin"){await admin()}
+  }catch(e){set("هەڵە",`<p class="empty err">${esc(e.message)}</p>`,1)}
+  bar();
+}
+
+function bar(){
+  $("#bar").innerHTML=count()&&!/^(cart|admin|driver|track)/.test(location.hash.slice(1))?`<div class="bar" data-go="cart"><span>سەبەتە (${count()})</span><span>${fmt(total())}</span></div>`:"";
+}
+
+function track(arg){
+  const [col,id]=arg.split(".");
+  set("دۆخی داواکاری","<p class='empty'>بارکردن...</p>",1);
+  unsubs.push(onSnapshot(doc(db,col,id),s=>{
+    if(!s.exists()){$("#app").innerHTML=`<p class="empty">داواکاری نەدۆزرایەوە.</p>`;return}
+    const o=s.data(),msg=encodeURIComponent("سڵاو، داواکارییەکەم: "+(col==="taxi"?o.from+" ← "+o.to:(o.items||[]).map(i=>i.name+"×"+i.qty).join("، ")+" | "+o.total+" د.ع")+" | ژمارە: "+id.slice(0,6));
+    $("#app").innerHTML=`${note()}<p class="big">${ST[o.status]||""}</p>${o.driverName?`<div class="row"><div class="t"><b>شۆفێر: ${esc(o.driverName)}</b></div><a class="btn sm" href="${tel(o.driverPhone)}">پەیوەندی بە شۆفێر</a></div>`:""}<div class="row"><div class="t">${col==="taxi"?esc(o.from)+" ← "+esc(o.to):esc(o.address)+"<br>"+(o.items||[]).map(i=>esc(i.name)+" × "+i.qty).join("، ")+"<br><b>"+fmt(o.total)+"</b>"}</div></div><a class="btn wa full" href="https://wa.me/${ADMIN_WA}?text=${msg}" target="_blank" rel="noopener">واتسئاپ بۆ تاسولجە</a><a class="btn full" href="tel:+${ADMIN_WA}">پەیوەندی بە ئادمین</a>`;
+  },e=>{$("#app").innerHTML=`<p class="empty err">${esc(e.message)}</p>`}));
+}
+
+const loginForm=m=>`${note()}${m?`<p class="msg err">${m}</p>`:""}${user?`<button class="btn red full" data-logout>دەرچوون</button>`:`<input id="em" type="email" placeholder="ئیمەیڵ" dir="ltr"><input id="pw" type="password" placeholder="پاسوۆرد" dir="ltr"><button class="btn full" data-login>چوونەژوورەوە</button>`}`;
+
+function driverView(){
+  if(role!=="driver"){set("شۆفێر",loginForm(user?"ئەم ئەکاونتە شۆفێر نییە":""),1);return}
+  set("شۆفێر: "+me.name,`${note()}<div id="live"></div><button class="btn red sm" data-logout>دەرچوون</button>`,1);
+  const c=n=>collection(db,n),u=user.uid;
+  listen({orders:query(c("orders"),where("status","==","new")),taxi:query(c("taxi"),where("status","==","new")),morders:query(c("orders"),where("driverId","==",u)),mtaxi:query(c("taxi"),where("driverId","==",u))},d=>{
+    const nw=merge(d.orders,d.taxi),mine=merge(d.morders,d.mtaxi);
+    $("#live").innerHTML=`<h2>داواکاری نوێ (${nw.length})</h2>${nw.map(o=>card(o,"driver")).join("")||'<p class="empty">هیچ داواکارییەکی نوێ نییە.</p>'}<h2>ئەوانەی من</h2>${mine.map(o=>card(o,"mine")).join("")||'<p class="empty">هیچت وەرنەگرتووە.</p>'}`;
+  });
+}
+
+async function admin(){
+  if(role!=="admin"){set("ئادمین",loginForm(user?"ئەم ئەکاونتە ئادمین نییە":""),1);return}
+  const T=[["live","داواکاری"],["shops","دووکان"],["prods","بەرهەم"],["drv","شۆفێر"]];
+  const head=`${note()}<div class="tabs">${T.map(t=>`<button data-tab="${t[0]}" class="${tab===t[0]?"on":""}">${t[1]}</button>`).join("")}<button data-logout>دەرچوون</button></div>`;
+  if(tab==="live"){
+    set("ئادمین",head+`<div id="live"><p class="empty">بارکردن...</p></div>`,1);
+    drivers=await docs("drivers");
+    listen({orders:collection(db,"orders"),taxi:collection(db,"taxi")},d=>{const l=merge(d.orders,d.taxi);$("#live").innerHTML=l.map(o=>card(o,"admin")).join("")||'<p class="empty">هیچ داواکارییەک نییە.</p>'});
+    return;
+  }
+  let h="";
+  if(tab==="shops"){
+    shops=await docs("shops");
+    h=`<input id="sn" placeholder="ناوی دووکان"><select id="sc">${CATS.filter(c=>c.id!=="taxi").map(c=>`<option value="${c.id}">${c.n}</option>`).join("")}</select><input id="sp" type="tel" placeholder="ژمارەی مۆبایل"><input id="si" placeholder="لینکی وێنە (ئارەزوومەندانە)" dir="ltr"><button class="btn full" data-addshop>زیادکردنی دووکان</button><h2>دووکانەکان</h2>`+shops.map(s=>`<div class="row"><div class="t"><b>${esc(s.name)}</b></div><button class="btn red sm" data-del="shops/${s.id}">سڕینەوە</button></div>`).join("");
+  }else if(tab==="prods"){
+    shops=await docs("shops");const pr=await docs("products");
+    h=shops.length?`<select id="ps">${shops.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join("")}</select><input id="pn" placeholder="ناوی بەرهەم"><input id="pp" type="number" inputmode="numeric" placeholder="نرخ (دینار)"><input id="pi" placeholder="لینکی وێنە (ئارەزوومەندانە)" dir="ltr"><button class="btn full" data-addprod>زیادکردنی بەرهەم</button><h2>بەرهەمەکان</h2>`+pr.map(x=>`<div class="row"><div class="t"><b>${esc(x.name)}</b><small>${esc(shops.find(s=>s.id===x.shopId)?.name||"")} · ${fmt(x.price)}</small></div><button class="btn red sm" data-del="products/${x.id}">سڕینەوە</button></div>`).join(""):`<p class="empty">سەرەتا دووکانێک زیاد بکە.</p>`;
+  }else{
+    drivers=await docs("drivers");
+    h=`<input id="dn" placeholder="ناوی شۆفێر"><input id="dp" type="tel" placeholder="ژمارەی مۆبایل"><input id="de" type="email" placeholder="ئیمەیڵ" dir="ltr"><input id="dw" type="text" placeholder="پاسوۆرد (6 پیت یان زیاتر)" dir="ltr"><button class="btn full" data-adddrv>دروستکردنی شۆفێر</button><h2>شۆفێرەکان</h2>`+(drivers.map(d=>`<div class="row"><div class="t"><b>${esc(d.name)}</b><small dir="ltr">${esc(d.email)} · ${esc(d.phone)}</small></div><button class="btn red sm" data-del="drivers/${d.id}">سڕینەوە</button></div>`).join("")||'<p class="empty">هێشتا شۆفێر نییە.</p>');
+  }
+  set("ئادمین",head+h,1);
+}
+
+const go=h=>{location.hash=h};
+const ref=k=>{const[c,i]=k.split("/");return doc(db,c,i)};
+document.addEventListener("click",async e=>{
+  const el=e.target.closest("[data-go],[data-add],[data-inc],[data-dec],[data-order],[data-taxi],[data-login],[data-logout],[data-tab],[data-addshop],[data-addprod],[data-adddrv],[data-del],[data-accept],[data-done],[data-assign],[data-cancel]");
+  if(!el)return;
+  const d=el.dataset,has=a=>el.hasAttribute("data-"+a);
+  try{
+    if(d.go)return go(d.go);
+    if(d.add){const f=cart.find(i=>i.id===d.add);f?f.qty++:cart.push({id:d.add,name:d.n,price:+d.p,shop:d.s,qty:1});saveCart();el.textContent="زیادکرا ✓";return bar()}
+    if(d.inc!==undefined||d.dec!==undefined){const k=+(d.inc??d.dec);cart[k].qty+=d.inc!==undefined?1:-1;if(cart[k].qty<1)cart.splice(k,1);saveCart();return render()}
+    if(has("order")){
+      if(!val("n")||!val("ph")||!val("ad"))return alert("ناو و ژمارە و ناونیشان پڕ بکەرەوە");
+      const r=await addDoc(collection(db,"orders"),{name:val("n"),phone:val("ph"),address:val("ad"),items:cart,total:total(),status:"new",createdAt:serverTimestamp()});
+      cart=[];saveCart();try{localStorage.setItem("tlast","orders."+r.id)}catch(x){}
+      flash="✓ داواکارییەکەت نێردرا";return go("track-orders."+r.id);
+    }
+    if(has("taxi")){
+      if(!val("ph")||!val("fr")||!val("to"))return alert("ژمارە و شوێنەکان پڕ بکەرەوە");
+      const r=await addDoc(collection(db,"taxi"),{name:val("n"),phone:val("ph"),from:val("fr"),to:val("to"),status:"new",createdAt:serverTimestamp()});
+      try{localStorage.setItem("tlast","taxi."+r.id)}catch(x){}
+      flash="✓ داواکاری تەکسی نێردرا";return go("track-taxi."+r.id);
+    }
+    if(has("login")){try{await signInWithEmailAndPassword(auth,val("em"),$("#pw").value)}catch(x){flash="<span class='err'>ئیمەیڵ یان پاسوۆرد هەڵەیە</span>";render()}return}
+    if(has("logout")){await signOut(auth);return}
+    if(d.tab){tab=d.tab;return render()}
+    if(has("addshop")){if(!val("sn"))return alert("ناوی دووکان بنووسە");await addDoc(collection(db,"shops"),{name:val("sn"),category:val("sc"),phone:val("sp"),img:val("si")});flash="✓ دووکان زیادکرا";return render()}
+    if(has("addprod")){if(!val("pn")||!val("pp"))return alert("ناو و نرخ بنووسە");await addDoc(collection(db,"products"),{shopId:val("ps"),name:val("pn"),price:+val("pp"),img:val("pi")});flash="✓ بەرهەم زیادکرا";return render()}
+    if(has("adddrv")){
+      if(!val("dn")||!val("de")||val("dw").length<6)return alert("ناو و ئیمەیڵ و پاسوۆردی 6 پیت بنووسە");
+      const sec=initializeApp(app.options,"sec");
+      try{const c=await createUserWithEmailAndPassword(getAuth(sec),val("de"),val("dw"));await setDoc(doc(db,"drivers",c.user.uid),{name:val("dn"),phone:val("dp"),email:val("de")})}finally{await deleteApp(sec)}
+      flash="✓ شۆفێر دروستکرا";return render();
+    }
+    if(d.accept){
+      const r=ref(d.accept);
+      try{await runTransaction(db,async t=>{const s=await t.get(r);if(s.data().status!=="new")throw new Error("taken");t.update(r,{status:"accepted",driverId:user.uid,driverName:me.name,driverPhone:me.phone||"",acceptedAt:serverTimestamp()})})}
+      catch(x){alert(x.message==="taken"?"ئەم داواکارییە پێشتر شۆفێرێکی تر وەریگرتووە":"هەڵە: "+x.message)}
+      return;
+    }
+    if(d.done){await updateDoc(ref(d.done),{status:"delivered",doneAt:serverTimestamp()});return}
+    if(d.assign){const dr=drivers.find(x=>x.id===$("#d-"+d.assign.split("/")[1])?.value);if(!dr)return alert("شۆفێر هەڵبژێرە");await updateDoc(ref(d.assign),{status:"accepted",driverId:dr.id,driverName:dr.name,driverPhone:dr.phone||"",acceptedAt:serverTimestamp()});return}
+    if(d.cancel){if(confirm("هەڵیبوەشێنیتەوە؟"))await updateDoc(ref(d.cancel),{status:"cancelled"});return}
+    if(d.del){if(!/^(orders|taxi)\//.test(d.del)&&!confirm("دڵنیایت؟"))return;await deleteDoc(ref(d.del));return/^(orders|taxi)\//.test(d.del)?0:render()}
+  }catch(x){alert("هەڵە: "+x.message)}
+});
+$("#back").onclick=()=>go("home");
+addEventListener("hashchange",render);
+onAuthStateChanged(auth,async u=>{
+  user=u;me=null;role="";
+  if(u){if(u.email===ADMIN_EMAIL)role="admin";else{try{const s=await getDoc(doc(db,"drivers",u.uid));if(s.exists()){me=s.data();role="driver"}}catch(x){}}}
+  if(/^(admin|driver)/.test(location.hash.slice(1)))render();
+});
+render();
+if("serviceWorker" in navigator)addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
 </script>
 </body>
 </html>
