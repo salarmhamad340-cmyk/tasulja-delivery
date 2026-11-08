@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ckb" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>تاسلوجە دلیڤەری</title>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#b8963e;--gold-d:#8f7230;--bg:#faf6ee;--card:#ffffff;--ink:#2b2418;--mute:#7a6f5c;--line:#eadfc6;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1b1710;--card:#272016;--ink:#f3ead6;--mute:#b3a688;--line:#3a3022}}
+:root[data-theme="dark"]{--bg:#1b1710;--card:#272016;--ink:#f3ead6;--mute:#b3a688;--line:#3a3022}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Vazirmatn',Tahoma,sans-serif;min-height:100vh}
+header{background:var(--gold);color:#fff;padding:28px 20px 34px;border-radius:0 0 28px 28px}
+header h1{margin:0;font-size:26px;font-weight:800}
+header p{margin:6px 0 0;font-size:14px;opacity:.92}
+main{padding:22px 16px 40px;max-width:520px;margin:0 auto}
+h2{font-size:17px;margin:0 4px 14px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.tile{all:unset;box-sizing:border-box;cursor:pointer;background:var(--card);border:1.5px solid var(--line);border-radius:22px;padding:20px 12px 18px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;min-height:150px;justify-content:center;transition:transform .15s,border-color .15s}
+.tile:active{transform:scale(.97)}
+.tile:hover,.tile:focus-visible{border-color:var(--gold)}
+.tile:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.ico{width:64px;height:64px;border-radius:20px;background:var(--gold);display:grid;place-items:center}
+.ico svg{width:34px;height:34px;stroke:#fff;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tile b{font-size:15px;line-height:1.5}
+#sec{display:none;padding:22px 16px;max-width:520px;margin:0 auto}
+.back{all:unset;cursor:pointer;color:var(--gold-d);font-weight:700;padding:6px 0;display:inline-block}
+.back:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.empty{background:var(--card);border:1.5px dashed var(--line);border-radius:22px;padding:36px 20px;text-align:center;margin-top:16px;color:var(--mute)}
+.empty h3{color:var(--ink);margin:0 0 8px}
+</style>
+</head>
+<body>
+<header>
+  <h1>تاسلوجە دلیڤەری</h1>
+  <p>بەخێربێیت، چیت دەوێت؟</p>
+</header>
+
+<main id="home">
+  <h2>بەشەکان</h2>
+  <div class="grid">
+    <button class="tile" data-s="food"><span class="ico"><svg viewBox="0 0 24 24"><path d="M7 3v8M4 3v5a3 3 0 0 0 6 0V3M7 11v10M17 21V3c-2.5 1.5-4 4.5-4 8h4"/></svg></span><b>دووکانەکانی خواردنەمەنی</b></button>
+    <button class="tile" data-s="taxi"><span class="ico"><svg viewBox="0 0 24 24"><path d="M5 16l1.5-5.5A2 2 0 0 1 8.4 9h7.2a2 2 0 0 1 1.9 1.5L19 16M4 16h16v3H4zM7 19v1.5M17 19v1.5M9 6h6"/><circle cx="8" cy="16" r=".6"/><circle cx="16" cy="16" r=".6"/></svg></span><b>تاکسی تاسلوجە</b></button>
+    <button class="tile" data-s="beauty"><span class="ico"><svg viewBox="0 0 24 24"><path d="M10 3h4v5h-4zM9 8h6v3H9zM8 11h8v10H8z"/></svg></span><b>کۆسمەتیک و ئافرەتان</b></button>
+    <button class="tile" data-s="other"><span class="ico"><svg viewBox="0 0 24 24"><path d="M4 9l1-5h14l1 5M4 9v11h16V9M4 9a2.7 2.7 0 0 0 5.3 0 2.7 2.7 0 0 0 5.4 0A2.7 2.7 0 0 0 20 9M10 20v-5h4v5"/></svg></span><b>دووکانەکانی تر</b></button>
+  </div>
+</main>
+
+<section id="sec">
+  <button class="back" id="back">‹ گەڕانەوە</button>
+  <h2 id="st" style="margin-top:10px"></h2>
+  <div class="empty"><h3>بەم زووانە</h3>لێرە دووکانەکان دەردەکەون کاتێک ئادمین زیادیان بکات.</div>
+</section>
+
+<script>
+var names={food:"دووکانەکانی خواردنەمەنی",taxi:"تاکسی تاسلوجە",beauty:"کۆسمەتیک و ئافرەتان",other:"دووکانەکانی تر"};
+var home=document.getElementById('home'),sec=document.getElementById('sec');
+function show(k){
+  if(k&&names[k]){home.style.display='none';sec.style.display='block';document.getElementById('st').textContent=names[k];}
+  else{sec.style.display='none';home.style.display='block';}
+}
+document.querySelectorAll('.tile').forEach(function(b){b.addEventListener('click',function(){location.hash=b.dataset.s;});});
+document.getElementById('back').addEventListener('click',function(){location.hash='';show();});
+window.addEventListener('hashchange',function(){show(location.hash.slice(1));});
+show(location.hash.slice(1));
+</script>
+</body>
+</html>
