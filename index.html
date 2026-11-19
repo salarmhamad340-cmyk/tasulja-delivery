@@ -150,19 +150,60 @@ async function render(){
       set(s.name,pr.length?pr.map(x=>`<div class="row">${x.img?`<img src="${esc(x.img)}" alt="">`:""}<div class="t"><b>${esc(x.name)}</b><small>${fmt(x.price)}</small></div><button class="btn sm" data-add="${x.id}" data-n="${esc(x.name)}" data-p="${x.price}" data-s="${esc(s.name)}">زیادکردن</button></div>`).join(""):`<p class="empty">هێشتا بەرهەم نییە.</p>`,1);
     }else if(p==="cart"){
       set("سەبەتە",cart.length?`${note()}${cart.map((i,k)=>`<div class="row"><div class="t"><b>${esc(i.name)}</b><small>${esc(i.shop)} · ${fmt(i.price*i.qty)}</small></div><div class="qty"><button data-dec="${k}" aria-label="کەمکردن">−</button><b>${i.qty}</b><button data-inc="${k}" aria-label="زیادکردن">+</button></div></div>`).join("")}<h2>کۆی گشتی: ${fmt(total())}</h2><input id="n" placeholder="ناو"><input id="ph" type="tel" placeholder="ژمارەی مۆبایل"><textarea id="ad" rows="2" placeholder="ناونیشان"></textarea><button class="btn full" data-order>ناردنی داواکاری</button>`:`<p class="empty">سەبەتەکەت بەتاڵە.<br>دووکانێک هەڵبژێرە و بەرهەم زیاد بکە.</p>`,1);
-    } }else if(p==="taxi"){
-  set("تەکسی تاسڵوجە", `
-    <input id="txName" placeholder="ناوەکەت">
-    <input id="txPhone" placeholder="0750 xxx xxxx">
-    <button onclick="getMyLocation()">📍 شوێنەکەم دیاری بکە</button>
-    <p id="myLocText"></p>
-    <input id="txTo" placeholder="بۆ کوێ دەچیت؟">
-    <button onclick="openMapPicker()">🎯 لەسەر نەخشە هەڵبژێرە</button>
-    <div id="priceBox" style="display:none"><b id="priceText"></b><br><span id="kmText"></span></div>
-    <button onclick="calcPrice()">💰 نرخەکە بزانە</button>
-    <button onclick="sendTaxiOrder()">✅ داواکردنی تەکسی</button>
-    <p>هەر ١ کم = ٥٠٠ دینار | کەمترین نرخ = ٣٠٠٠ دینار</p>
-  `);
+    } }let myLat = 0, myLng = 0;
+
+function getMyLocation() {
+  navigator.geolocation.getCurrentPosition(pos => {
+    myLat = pos.coords.latitude;
+    myLng = pos.coords.longitude;
+    document.getElementById("myLocText").innerText = "✅ شوێنەکەت دۆزرایەوە";
+  }, () => alert("ڕێگە بە لۆکەیشن بدە"));
+}
+
+function openMapPicker() {
+  if (!myLat) return alert("شوێنەکەت دیاری بکە");
+  window.open(`https://maps.google.com/?q=${myLat},${myLng}`);
+}
+
+function calcPrice() {
+  let to = document.getElementById("txTo").value;
+  if (!to) return alert("شوێنی چوون بنووسە");
+
+  let km = Number(prompt("دووری بە کیلۆمەتر؟"));
+  if (!km || km <= 0) return;
+
+  let price = Math.max(3000, km * 500);
+
+  document.getElementById("priceBox").style.display = "block";
+  document.getElementById("priceText").innerText = "نرخ: " + price + " دینار";
+  document.getElementById("kmText").innerText = "دووری: " + km + " KM";
+
+  window._taxiPrice = price;
+  window._taxiKm = km;
+}
+
+async function sendTaxiOrder() {
+  let name = document.getElementById("txName").value;
+  let phone = document.getElementById("txPhone").value;
+  let to = document.getElementById("txTo").value;
+
+  if (!name || !phone || !to || !myLat || !window._taxiPrice)
+    return alert("تکایە زانیارییەکان و نرخ پڕ بکەرەوە");
+
+  await addDoc(collection(db, "taxiOrders"), {
+    name, phone, to,
+    price: window._taxiPrice,
+    km: window._taxiKm,
+    lat: myLat,
+    lng: myLng,
+    mapLink: `https://maps.google.com/?q=${myLat},${myLng}`,
+    status: "new",
+    createdAt: serverTimestamp()
+  });
+
+  alert("✅ داواکارییەکەت نێردرا");
+  location.hash = "#home";
+}
     else if(p==="track"){track(arg)}
     else if(p==="driver"){driverView()}
     else if(p==="admin"){await admin()}
