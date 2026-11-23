@@ -64,7 +64,7 @@ function saveCart(){localStorage.setItem('tasulja_cart',JSON.stringify(cart));lo
 function updateCartBar(){let total=cart.reduce((a,i)=>a+i.price*i.qty,0);let bar=$('cartBar');if(cart.length){bar.style.display='block';bar.innerHTML=`سەبەتە: ${cart.length} شت - ${total.toLocaleString()} دینار | ببینە`;bar.onclick=()=>cartView()}else{bar.style.display='none'}}
 
 function start(){
-  if(auth.currentUser && auth.currentUser.email===ADMIN_EMAIL){isAdmin=true;return adminView()}
+ if(auth.currentUser && ADMIN_EMAILS.includes(auth.currentUser.email)){isAdmin=true;return adminView()}
   if(me) return homeView(); loginView();
 }
 auth.onAuthStateChanged(()=>start());
