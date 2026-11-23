@@ -1,1 +1,219 @@
+<!DOCTYPE html>
+<html lang="ku" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>تاسولجە</title>
+<style>
+body{font-family:Tahoma,Arial,sans-serif;margin:0;background:#f4f6f8;color:#222}
+header{background:#1e7e34;color:#fff;padding:14px;text-align:center;font-size:20px}
+main{max-width:520px;margin:16px auto;padding:0 12px}
+.card{background:#fff;border-radius:12px;padding:14px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+input,select,textarea{width:100%;padding:11px;margin:5px 0;border:1px solid #ccc;border-radius:8px;font-size:16px;box-sizing:border-box}
+button{width:100%;padding:11px;margin:5px 0;border:0;border-radius:8px;background:#1e7e34;color:#fff;font-size:15px;cursor:pointer}
+button.sec{background:#555}
+button.danger{background:#c0392b}
+.row{display:flex;gap:8px;align-items:center;justify-content:space-between}
+.tag{font-size:12px;padding:3px 8px;border-radius:6px;background:#eee;white-space:nowrap}
+.small{font-size:13px;color:#666;margin:3px 0}
+</style>
+</head>
+<body>
+<header>تاسولجە</header>
+<main id="app"></main>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+// ١) ئەم زانیارییانە لە Firebase Console > Project settings بگرە
+firebase.initializeApp({
+  apiKey: "PUT_YOUR_API_KEY",
+  authDomain: "PUT_YOUR_PROJECT.firebaseapp.com",
+  projectId: "PUT_YOUR_PROJECT",
+  appId: "PUT_YOUR_APP_ID"
+});
+
+// ٢) ئەم ئیمەیڵە لە Authentication > Users دروست بکە (Email/Password)
+const ADMIN_EMAIL = "admin@tasulja.app";
+
+const db = firebase.firestore();
+const auth = firebase.auth();
+const $ = id => document.getElementById(id);
+const app = $('app');
+const STATUS = {pending:'چاوەڕوان', accepted:'قبوڵکراو', done:'تەواوبوو'};
+let me = JSON.parse(localStorage.getItem('tasulja_user') || 'null');
+let unsubs = [];
+
+function esc(s){return String(s ?? '').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function phoneClean(p){return String(p || '').replace(/\D/g,'');}
+function stopListeners(){ unsubs.forEach(u=>u()); unsubs = []; }
+function setView(html){ stopListeners(); app.innerHTML = html; }
+function wire(sel, fn){ document.querySelectorAll(sel).forEach(b => b.onclick = () => fn(b)); }
+function sortByTime(arr){ return arr.sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0)); }
+
+function logout(){
+  localStorage.removeItem('tasulja_user');
+  me = null;
+  auth.signOut().catch(()=>{});
+  start();
+}
+
+function start(){
+  const u = auth.currentUser;
+  if (u && u.email === ADMIN_EMAIL) return adminView();
+  if (me && me.role === 'driver') return driverView();
+  if (me) return homeView();
+  loginView();
+}
+
+// ---------- کڕیار ----------
+function loginView(){
+  setView(`<div class="card"><h3>داخڵبوون</h3>
+    <input id="name" placeholder="ناوی تەواو">
+    <input id="phone" placeholder="ژمارەی مۆبایل" inputmode="tel">
+    <button id="loginBtn">چوونەژوورەوە</button>
+    <button class="sec" id="adminBtn">بەڕێوەبەر</button></div>`);
+  $('loginBtn').onclick = customerLogin;
+  $('adminBtn').onclick = adminLoginView;
+}
+
+async function customerLogin(){
+  const name = $('name').value.trim();
+  const phone = phoneClean($('phone').value);
+  if (!name || phone.length < 8) return alert('ناو و ژمارەی مۆبایلی دروست بنووسە');
+  try {
+    const uref = db.collection('users').doc(phone);
+    const snap = await uref.get();
+    if (snap.exists && snap.data().blocked) return alert('ئەم ژمارەیە بلۆک کراوە');
+    if (!snap.exists) {
+      await uref.set({phone, name, blocked:false, createdAt: firebase.firestore.FieldValue.serverTimestamp()});
+    } else {
+      await uref.update({name});
+    }
+    const d = await db.collection('drivers').doc(phone).get();
+    const isDriver = d.exists && d.data().active;
+    me = {phone, name, role: isDriver ? 'driver' : 'customer', type: isDriver ? d.data().type : null};
+    localStorage.setItem('tasulja_user', JSON.stringify(me));
+    start();
+  } catch(e) {
+    alert('هەڵە: ' + e.message);
+  }
+}
+
+function homeView(){
+  setView(`<div class="card">
+    <div class="row"><b>سڵاو ${esc(me.name)}</b><button class="sec" id="out" style="width:auto">دەرچوون</button></div>
+    <button id="t">تەکسی تاسولجە</button>
+    <button id="f">دووکانەکانی خواردەمەنی</button>
+    <button id="s">دووکانەکانی تر</button>
+  </div>
+  <div class="card"><b>داواکارییەکانم</b><div id="mine"></div></div>`);
+  $('out').onclick = logout;
+  $('t').onclick = taxiView;
+  $('f').onclick = () => shopsView('food');
+  $('s').onclick = () => shopsView('shop');
+  unsubs.push(db.collection('requests').where('phone','==',me.phone).onSnapshot(s=>{
+    const list = sortByTime(s.docs.map(d=>({id:d.id, ...d.data()}))).slice(0,10);
+    $('mine').innerHTML = list.length ? list.map(r=>`<div class="card">
+      <div class="row"><span>${r.type==='taxi'?'تەکسی':'داواکاری'}: ${esc(r.title)}</span><span class="tag">${STATUS[r.status]}</span></div>
+      ${r.driverName ? `<div class="small">شۆفێر: ${esc(r.driverName)} (${esc(r.driverPhone)})</div>` : ''}
+    </div>`).join('') : '<p class="small">هیچ داواکارییەک نیە</p>';
+  }));
+}
+
+function taxiView(){
+  setView(`<div class="card"><h3>تەکسی تاسولجە</h3>
+    <input id="from" placeholder="لە کوێوە">
+    <input id="to" placeholder="بۆ کوێ">
+    <textarea id="note" placeholder="تێبینی (ئەگەر هەبێت)"></textarea>
+    <button id="send">ناردنی داواکاری</button>
+    <button class="sec" id="back">گەڕانەوە</button></div>`);
+  $('back').onclick = homeView;
+  $('send').onclick = () => {
+    const from = $('from').value.trim(), to = $('to').value.trim();
+    if (!from || !to) return alert('شوێنی هەڵگرتن و گەیشتن بنووسە');
+    createRequest('taxi', `${from} ← ${to}`, {from, to, note: $('note').value.trim()});
+  };
+}
+
+function shopsView(cat){
+  setView(`<div class="card"><h3>${cat==='food' ? 'دووکانەکانی خواردەمەنی' : 'دووکانەکانی تر'}</h3>
+    <div id="list"></div>
+    <button class="sec" id="back">گەڕانەوە</button></div>`);
+  $('back').onclick = homeView;
+  unsubs.push(db.collection('shops').where('category','==',cat).where('open','==',true).onSnapshot(s=>{
+    $('list').innerHTML = s.empty
+      ? '<p class="small">هیچ دووکانێکی کراوە نیە</p>'
+      : s.docs.map(d=>`<div class="row card"><b>${esc(d.data().name)}</b>
+          <button class="ord" data-id="${d.id}" data-name="${esc(d.data().name)}" style="width:auto">داواکاری</button></div>`).join('');
+    wire('.ord', b => orderView(b.dataset.id, b.dataset.name));
+  }));
+}
+
+function orderView(shopId, shopName){
+  setView(`<div class="card"><h3>${esc(shopName)}</h3>
+    <textarea id="items" placeholder="داواکاری (خواردن یان شت)"></textarea>
+    <input id="addr" placeholder="ناونیشان">
+    <button id="send">ناردن</button>
+    <button class="sec" id="back">گەڕانەوە</button></div>`);
+  $('back').onclick = homeView;
+  $('send').onclick = () => {
+    const items = $('items').value.trim();
+    if (!items) return alert('داواکارییەکەت بنووسە');
+    createRequest('order', shopName, {shopId, shopName, items, address: $('addr').value.trim()});
+  };
+}
+
+async function createRequest(type, title, extra){
+  try {
+    await db.collection('requests').add({
+      type, title, ...extra,
+      phone: me.phone, name: me.name,
+      status: 'pending', driverPhone: null, driverName: null,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    alert('داواکاریەکەت نێردرا');
+    homeView();
+  } catch(e) {
+    alert('نەنێردرا (لەوانەیە بلۆک کراویت): ' + e.message);
+  }
+}
+
+// ---------- شۆفێر / دلیڤەری ----------
+function driverView(){
+  const want = me.type === 'taxi' ? 'taxi' : 'order';
+  setView(`<div class="card">
+    <div class="row"><b>شۆفێر: ${esc(me.name)} (${me.type==='taxi'?'تەکسی':'دلیڤەری'})</b>
+    <button class="sec" id="out" style="width:auto">دەرچوون</button></div></div>
+    <div class="card"><b>داواکاری چاوەڕوان</b><div id="pend"></div></div>
+    <div class="card"><b>داواکارییەکانی من</b><div id="mineacc"></div></div>`);
+  $('out').onclick = logout;
+
+  unsubs.push(db.collection('requests').where('status','==','pending').onSnapshot(s=>{
+    const docs = s.docs.filter(d => d.data().type === want);
+    $('pend').innerHTML = docs.length ? docs.map(d=>{
+      const r = d.data();
+      return `<div class="card"><div>${esc(r.title)}</div>
+        <div class="small">کڕیار: ${esc(r.name)} ${esc(r.phone)}</div>
+        ${r.items ? `<div class="small">${esc(r.items)}</div>` : ''}
+        ${r.note ? `<div class="small">تێبینی: ${esc(r.note)}</div>` : ''}
+        <button class="acc" data-id="${d.id}">قبووڵکردن</button></div>`;
+    }).join('') : '<p class="small">هیچ داواکارییەک نیە</p>';
+    wire('.acc', b => acceptRequest(b.dataset.id));
+  }));
+
+  unsubs.push(db.collection('requests').where('driverPhone','==',me.phone).onSnapshot(s=>{
+    $('mineacc').innerHTML = s.docs.map(d=>{
+      const r = d.data();
+      return `<div class="card"><div>${esc(r.title)}</div>
+        <div class="small">کڕیار: ${esc(r.name)} ${esc(r.phone)}</div>
+        <div class="tag">${STATUS[r.status]}</div>
+        ${r.status !== 'done' ? `<button class="sec fin" data-id="${d.id}">تەواوبوو</button>` : ''}</div>`;
+    }).join('') || '<p class="small">هیچ نیە</p>';
+    wire('.fin', b => db.collection('requests').doc(b.dataset.id).update({status:'done'}));
+  }));
+}
+
+async
 
