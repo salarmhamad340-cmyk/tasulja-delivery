@@ -33,10 +33,27 @@ button.danger{background:#c0392b} button.edit{background:#f39c12}
 <script>
 // === 1. Firebase لێرە دابنێ ===
 firebase.initializeApp({
-  apiKey: "PUT_YOUR_API_KEY",
-  authDomain: "PUT_YOUR_PROJECT.firebaseapp.com",
-  projectId: "PUT_YOUR_PROJECT",
-  appId: "PUT_YOUR_APP_ID"
+  apiKey: "AIzaSyDlL4wL8ZfmuhfYwABRwSB8peYW8IW67wo",
+  authDomain: "tasulja-delivery.firebaseapp.com",
+  projectId: "tasulja-delivery",
+  appId: "1:549067569825
+import { initializeApp } from "firebase/app";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyDlL4wL8ZfmuhfYwABRwSB8peYW8IW67wo",
+  authDomain: "tasulja-delivery.firebaseapp.com",
+  projectId: "tasulja-delivery",
+  storageBucket: "tasulja-delivery.firebasestorage.app",
+  messagingSenderId: "549067569825",
+  appId: "1:549067569825:web:07f593443ab6a0c3a28ee0"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+کەواتە ئەو نوسینە لە هێڵی 36 بنوسم‌ 
 });
 const ADMIN_EMAIL = "admin@tasulja.app";
 const db = firebase.firestore();
