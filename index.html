@@ -116,4 +116,35 @@ function showAdminOrders(){
 function enterDelivery(){ if(!deliveryName){ ask('ناوی دلیڤەری','ناوەکەت بنووسە', (n)=>{ if(!n) return; deliveryName=n; localStorage.setItem('tasuje_delivery',n); showDelivery(); }); } else showDelivery(); }
 function showDelivery(){
   let html=`<button class="sec" onclick="home()">← سەرەتا</button><div class="card"><h3>🛵 تەڵەبەکان - ${deliveryName}</h3></div>`; let has=false;
-  orders.forEach((o,idx)=>{ if(o.status=='pending'){ has=true; html+=`<div class="card"><b>${o.shopName}</b><br>کڕیار: ${o.customerName} · ${o.phone}<br>📍 ${o.address}<br>بەرهەم: ${o.items.map(i=>i
+    orders.forEach((o,idx)=>{
+    if(o.status=='pending'){
+      has=true;
+      html+=`<div class="card"><b>${o.shopName}</b><br>کڕیار: ${o.customerName} · ${o.phone}<br>📍 ${o.address}<br>بەرهەم: ${o.items.map(i=>i.name+' x'+i.qty).join(', ')}<br><b>کۆی: ${o.total}</b><button onclick="acceptOrder(${idx})">✅ قبوڵی دەکەم</button></div>`;
+    }
+    if(o.status=='accepted' && o.deliveryName==deliveryName){
+      has=true;
+      html+=`<div class="card" style="border:2px solid #2e7d32"><b>🟢 تەڵەبەکەت - ${o.shopName}</b><br>${o.customerName} · ${o.phone}<br>📍 ${o.address}<br><b>${o.total}</b><button class="blue" onclick="finishOrder(${idx})">📦 گەیاندم</button></div>`;
+    }
+  });
+  if(!has) html+='<div class="card">هیچ تەڵەبێکی نوێ نییە</div>';
+  document.getElementById('app').innerHTML=html;
+}
+function acceptOrder(idx){
+  if(orders[idx].status!=='pending') return toast('پێشتر قبوڵکراوە!');
+  orders[idx].status='accepted';
+  orders[idx].deliveryName=deliveryName;
+  save();
+  toast('✅ قبوڵت کرد!');
+  showDelivery();
+}
+function finishOrder(idx){
+  orders[idx].status='delivered';
+  save();
+  showDelivery();
+  toast('دەست خۆش!');
+}
+
+if(localStorage.getItem('tasuje_logged')) home(); else showLogin();
+</script>
+</body>
+</html>
