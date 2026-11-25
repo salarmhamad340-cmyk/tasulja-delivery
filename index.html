@@ -1,178 +1,220 @@
-<!DOCTYPE html>
-<html lang="ku" dir="rtl">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>تاسولجە</title>
-<style>
-body{font-family:Tahoma,sans-serif;margin:0;background:#f2f4f7;color:#222}
-header{background:#1e7e34;color:#fff;padding:14px;text-align:center;font-size:22px;font-weight:bold;position:sticky;top:0;z-index:10}
-main{max-width:560px;margin:14px auto;padding:0 12px 90px}
-.card{background:#fff;border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
-.shop-img{width:100%;height:150px;object-fit:cover;border-radius:12px;background:#eee}
-.item-img{width:70px;height:70px;object-fit:cover;border-radius:10px;background:#eee}
-input,select,textarea{width:100%;padding:11px;margin:6px 0;border:1px solid #ddd;border-radius:10px;font-size:15px;box-sizing:border-box}
-button{width:100%;padding:12px;margin:6px 0;border:0;border-radius:10px;background:#1e7e34;color:#fff;font-size:15px;cursor:pointer;font-weight:bold}
-button.sec{background:#555}
-button.smallBtn{width:auto;padding:7px 12px;font-size:13px}
-button.danger{background:#c0392b}
-button.edit{background:#f39c12}
-button.blue{background:#2980b9}
-.row{display:flex;gap:10px;align-items:center;justify-content:space-between}
-.small{font-size:13px;color:#666}
-.price{font-weight:bold;color:#1e7e34;font-size:16px}
-.badge{background:#e8f5e9;color:#1e7e34;padding:3px 9px;border-radius:20px;font-size:12px}
-.badge-warn{background:#fef9e7;color:#f39c12;padding:3px 9px;border-radius:20px;font-size:12px}
-.cart-bar{position:fixed;bottom:0;left:0;right:0;background:#1e7e34;color:#fff;padding:14px;text-align:center;font-weight:bold;cursor:pointer;z-index:20}
-.stat{background:#f8f9fa;border-radius:12px;padding:12px;text-align:center;flex:1}
-</style>
-</head>
-<body>
-<header>تاسولجە</header>
-<main id="app"></main>
-<div id="cartBar" class="cart-bar" style="display:none"></div>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-<script>
-const firebaseConfig = {
-  apiKey: "AIzaSyDlL4wL8ZfmuhfYwABRwSB8peYW8IW67wo",
-  authDomain: "tasulja-delivery.firebaseapp.com",
-  projectId: "tasulja-delivery",
-  storageBucket: "tasulja-delivery.firebasestorage.app",
-  messagingSenderId: "549067569825",
-  appId: "1:549067569825:web:07f593443ab6a0c3a28ee0"
-};
-firebase.initializeApp(firebaseConfig);
-const ADMIN_EMAILS = ["xamahama17@gmail.com", "salarmhamad340@gmail.com", "muhamad16551@gmail.com"];
-const db = firebase.firestore();
-const auth = firebase.auth();
-const DELIVERY_FEE = 1000;
-const $ = id => document.getElementById(id);
-const app = $('app');
-let me = JSON.parse(localStorage.getItem('tasulja_user')||'null');
-let cart = JSON.parse(localStorage.getItem('tasulja_cart')||'[]');
-let cartShop = localStorage.getItem('tasulja_cartShop')||'';
-let unsubs = [];
-let myShopId = null;
-function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function stop(){unsubs.forEach(u=>u());unsubs=[]}
-function setView(h){stop();app.innerHTML=h;updateCartBar()}
-function saveCart(){localStorage.setItem('tasulja_cart',JSON.stringify(cart));localStorage.setItem('tasulja_cartShop',cartShop);updateCartBar()}
-function updateCartBar(){let total=cart.reduce((a,i)=>a+i.price*i.qty,0);let bar=$('cartBar');if(cart.length && me && me.role==='customer'){bar.style.display='block';bar.innerHTML=`سەبەتە: ${cart.length} شت - ${total.toLocaleString()} دینار | ببینە`;bar.onclick=()=>cartView()}else{bar.style.display='none'}}
-function statusLabel(s){return {'pending':'⏳ نوێ','accepted':'✅ قبوڵکرا','preparing':'👨‍🍳 ئامادەکردن','ready':'🍽️ ئامادەیە بۆ گەیاندن','driver_accepted':'🚗 شۆفێر وەریگرت','delivering':'🛵 لە ڕێگا','delivered':'✅ گەیشت','rejected':'❌ ڕەتکرایەوە'}[s]||s}
 
-async function start(){
-  if(auth.currentUser && ADMIN_EMAILS.includes(auth.currentUser.email)){return adminView()}
-  if(!me) return loginView();
-  // پشکنینی خاوەن دووکانە؟
-  let shopSnap = await db.collection('shops').where('ownerPhone','==',me.phone).limit(1).get();
-  if(!shopSnap.empty){ myShopId = shopSnap.docs[0].id; me.role='shopOwner'; me.shopName=shopSnap.docs[0].data().name; localStorage.setItem('tasulja_user',JSON.stringify(me)); return shopOwnerView(); }
-  let d = await db.collection('drivers').doc(me.phone).get();
-  if(d.exists && d.data().active){ me.role='driver'; me.type=d.data().type; localStorage.setItem('tasulja_user',JSON.stringify(me)); return driverView(); }
-  me.role='customer'; return homeView();
+*{box-sizing:border-box}
+
+:root{
+  --green:#16834a;
+  --dark:#10663a;
+  --light:#eaf7ef;
+  --bg:#f4f7f5;
+  --text:#202b25;
+  --muted:#78847c;
+  --border:#e8eee9;
+  --red:#d94343;
+  --shadow:0 5px 20px rgba(20,80,45,.07);
 }
-auth.onAuthStateChanged(()=>start());
 
-// --- LOGIN ---
-function loginView(){setView(`<div class="card"><h3>داخڵبوون</h3><input id="name" placeholder="ناوی تەواو"><input id="phone" placeholder="ژمارەی مۆبایل" inputmode="tel"><button id="loginBtn">چوونەژوورەوە</button><button class="sec" id="adminBtn">بەڕێوەبەر</button><p class="small">تێبینی: بۆ SMS پێویستە Phone Authentication لە Firebase چالاک بکەیت. ئێستا بە ناو و ژمارە دەچیتە ژوورەوە.</p></div>`);
-  $('loginBtn').onclick=async()=>{
-    let name=$('name').value.trim(),phone=$('phone').value.replace(/\D/g,'');
-    if(!name||phone.length<8) return alert('ناو و ژمارە بنووسە');
-    try{
-      let ref=db.collection('users').doc(phone);let snap=await ref.get();
-      if(snap.exists && snap.data().blocked) return alert('بلۆک کراویت');
-      if(!snap.exists) await ref.set({phone,name,blocked:false,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
-      else await ref.update({name});
-      me={phone,name,role:'customer'}; localStorage.setItem('tasulja_user',JSON.stringify(me)); start();
-    }catch(e){alert(e.message)}
-  };
-  $('adminBtn').onclick=adminLoginView;
+body{
+  font-family:Tahoma,sans-serif;
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  direction:rtl;
+  -webkit-tap-highlight-color:transparent;
 }
-function adminLoginView(){setView(`<div class="card"><h3>بەڕێوەبەر</h3><input id="email" placeholder="ئیمەیڵ"><input id="pass" type="password" placeholder="وشەی نهێنی"><button id="go">چوونەژوورەوە</button><button class="sec" id="back">گەڕانەوە</button></div>`); $('back').onclick=loginView; $('go').onclick=async()=>{try{await auth.signInWithEmailAndPassword($('email').value.trim(),$('pass').value)}catch(e){alert('هەڵە: '+e.message)}}; }
-function logout(){localStorage.removeItem('tasulja_user');me=null;myShopId=null;auth.signOut();start()}
 
-// --- CUSTOMER ---
-function homeView(){setView(`<div class="card"><div class="row"><b>سڵاو ${esc(me.name)}</b><button class="sec smallBtn" id="out">دەرچوون</button></div><button id="t">🚕 تەکسی تاسولجە</button><button id="f">🍔 دووکانەکانی خواردەمەنی</button><button id="s">🛒 دووکانەکانی تر</button></div><div class="card"><b>داواکارییەکانم</b><div id="mine"></div></div>`);
-  $('out').onclick=logout;$('t').onclick=taxiView;$('f').onclick=()=>shopsView('food');$('s').onclick=()=>shopsView('shop');
-  unsubs.push(db.collection('requests').where('phone','==',me.phone).orderBy('createdAt','desc').limit(10).onSnapshot(s=>{$('mine').innerHTML=s.empty?'<p class="small">هیچ داواکارییەک نیە</p>':s.docs.map(d=>{let r=d.data();return `<div class="card"><div class="row"><span>${esc(r.title)}</span><span class="badge">${statusLabel(r.status)}</span></div>${r.total?`<div class="small">کۆی گشتی: ${r.total.toLocaleString()} دینار (گەیاندن 1000)</div>`:''}</div>`}).join('')}));
+header{
+  background:linear-gradient(135deg,#16834a,#0d6338);
+  color:white;
+  padding:20px 15px;
+  text-align:center;
+  font-size:24px;
+  font-weight:bold;
+  position:sticky;
+  top:0;
+  z-index:100;
+  box-shadow:0 4px 15px rgba(0,0,0,.12);
+  letter-spacing:.3px;
 }
-function taxiView(){setView(`<div class="card"><h3>🚕 تەکسی تاسولجە</h3><input id="from" placeholder="لە کوێوە"><input id="to" placeholder="بۆ کوێ"><textarea id="note" placeholder="تێبینی"></textarea><button id="send">ناردنی داواکاری</button><button class="sec" id="back">گەڕانەوە</button></div>`); $('back').onclick=homeView;$('send').onclick=async()=>{let from=$('from').value.trim(),to=$('to').value.trim();if(!from||!to) return alert('شوێن بنووسە');await db.collection('requests').add({type:'taxi',title:from+' ← '+to,phone:me.phone,name:me.name,status:'pending',createdAt:firebase.firestore.FieldValue.serverTimestamp()});alert('نێردرا');homeView()}}
-function shopsView(cat){setView(`<div class="card"><h3>${cat==='food'?'دووکانەکانی خواردەمەنی':'دووکانەکانی تر'}</h3><div id="list"></div><button class="sec" id="back">گەڕانەوە</button></div>`); $('back').onclick=homeView; unsubs.push(db.collection('shops').where('category','==',cat).where('open','==',true).onSnapshot(s=>{ $('list').innerHTML=s.empty?'<p class="small">هیچ دووکانێکی کراوە نیە</p>':s.docs.map(d=>{let sh=d.data();return `<div class="card" style="cursor:pointer" onclick="openShop('${d.id}','${esc(sh.name)}')">${sh.image?`<img class="shop-img" src="${sh.image}">`:''}<div class="row" style="margin-top:8px"><b>${esc(sh.name)}</b><span class="badge">کراوەیە</span></div><div class="small">${esc(sh.desc||'')}</div></div>`}).join('')})); }
-window.openShop=(id,name)=>shopMenuView(id,name);
-function shopMenuView(shopId,shopName){setView(`<div class="card"><h3>${esc(shopName)}</h3><div class="small">گەیاندن: 1000 دینار</div><div id="items"></div><button class="sec" id="back">گەڕانەوە</button></div>`); $('back').onclick=homeView; unsubs.push(db.collection('shops').doc(shopId).collection('items').where('available','==',true).onSnapshot(s=>{ $('items').innerHTML=s.empty?'<p class="small">هیچ شتێک لەم دووکانەدا نیە</p>':s.docs.map(d=>{let it=d.data();return `<div class="card"><div class="row">${it.image?`<img class="item-img" src="${it.image}">`:''}<div style="flex:1"><b>${esc(it.name)}</b><div class="small">${esc(it.desc||'')}</div><div class="price">${Number(it.price).toLocaleString()} دینار</div></div><button class="smallBtn" onclick="addToCart('${shopId}','${d.id}','${esc(it.name)}',${it.price})">+ زیادکردن</button></div></div>`}).join('')})); }
-window.addToCart=(shopId,id,name,price)=>{ if(cartShop && cartShop!==shopId && cart.length){if(!confirm('سەبەتەکەت لە دووکانێکی ترە، بیسڕینەوە؟')) return;cart=[]} cartShop=shopId;let f=cart.find(x=>x.id===id);if(f) f.qty++;else cart.push({id,name,price,qty:1});saveCart();alert(name+' زیادکرا'); }
-function cartView(){let subtotal=cart.reduce((a,i)=>a+i.price*i.qty,0);let total=subtotal+DELIVERY_FEE;setView(`<div class="card"><h3>سەبەتە</h3>${cart.map((it,i)=>`<div class="row"><span>${esc(it.name)} x ${it.qty}</span><span>${(it.price*it.qty).toLocaleString()} دینار <button class="smallBtn danger" onclick="removeCart(${i})">x</button></span></div>`).join('')}<hr><div class="row"><span>کۆی خواردن</span><span>${subtotal.toLocaleString()}</span></div><div class="row"><span>گەیاندن</span><span>1,000 دینار</span></div><div class="row"><b>کۆی گشتی</b><b>${total.toLocaleString()} دینار</b></div><input id="addr" placeholder="ناونیشان"><button id="send">ناردنی داواکاری</button><button class="sec" id="back">گەڕانەوە</button></div>`); $('back').onclick=homeView;$('send').onclick=async()=>{if(!cart.length) return;await db.collection('requests').add({type:'order',title:'داواکاری لە دووکان',items:cart,subtotal,deliveryFee:DELIVERY_FEE,total,shopId:cartShop,address:$('addr').value.trim(),phone:me.phone,name:me.name,status:'pending',createdAt:firebase.firestore.FieldValue.serverTimestamp()});cart=[];cartShop='';saveCart();alert('داواکاریەکەت نێردرا');homeView()}}
-window.removeCart=(i)=>{cart.splice(i,1);saveCart();cartView()}
 
-// --- SHOP OWNER - تەنیا دووکانەکەی خۆی ---
-function shopOwnerView(){
-  setView(`<div class="card"><div class="row"><b>دووکانەکەم: ${esc(me.shopName||'')}</b><button class="sec smallBtn" id="out">دەرچوون</button></div><button id="myMenu">🍔 مێنیو و نرخەکانم</button><button class="sec" id="myOrders">📦 داواکانی دووکانەکەم</button></div><div class="card"><b>داواکانی چاوەڕوان</b><div id="orders"></div></div>`);
-  $('out').onclick=logout; $('myMenu').onclick=()=>manageItems(myShopId, me.shopName, true); $('myOrders').onclick=()=>shopOwnerOrders();
-  unsubs.push(db.collection('requests').where('shopId','==',myShopId).where('status','==','pending').onSnapshot(s=>{
-    $('orders').innerHTML=s.empty?'<p class="small">هیچ داوایەکی نوێ نیە</p>':s.docs.map(d=>{let r=d.data();return `<div class="card"><b>داوایەکی نوێ! 🔔</b><div class="small">${esc(r.name)} - ${r.total?.toLocaleString()} دینار</div><div class="small">${r.items?r.items.map(i=>i.name+' x'+i.qty).join(', '):''}</div><div class="small">ناونیشان: ${esc(r.address||'')}</div><div class="row"><button class="smallBtn" onclick="changeStatus('${d.id}','accepted')">✅ قبوڵکردن</button><button class="smallBtn danger" onclick="changeStatus('${d.id}','rejected')">❌ ڕەتکردنەوە</button></div></div>`}).join('');
-  }));
+main{
+  max-width:560px;
+  margin:16px auto;
+  padding:0 13px 110px;
 }
-function shopOwnerOrders(){
-  setView(`<div class="card"><h3>داواکانی دووکانەکەم</h3><div id="list"></div><button class="sec" id="back">گەڕانەوە</button></div>`);
-  $('back').onclick=shopOwnerView;
-  unsubs.push(db.collection('requests').where('shopId','==',myShopId).orderBy('createdAt','desc').limit(30).onSnapshot(s=>{
-    $('list').innerHTML=s.docs.map(d=>{let r=d.data();let btn='';if(r.status==='accepted') btn=`<button class="smallBtn" onclick="changeStatus('${d.id}','preparing')">👨‍🍳 دەست بکە بە ئامادەکردن</button>`;if(r.status==='preparing') btn=`<button class="smallBtn" onclick="changeStatus('${d.id}','ready')">🍽️ ئامادەیە - بنێرە بۆ شۆفێر</button>`;return `<div class="card"><b>${esc(r.title)}</b><div class="small">${esc(r.name)} - ${r.total?.toLocaleString()} دینار - ${statusLabel(r.status)}</div><div class="small">${r.items?r.items.map(i=>i.name+' x'+i.qty).join(', '):''}</div>${btn}</div>`}).join('');
-  }));
+
+.card{
+  background:white;
+  border:1px solid var(--border);
+  border-radius:19px;
+  padding:17px;
+  margin-bottom:14px;
+  box-shadow:var(--shadow);
+  animation:fadeIn .25s ease;
 }
-window.changeStatus=async(id,st)=>{await db.collection('requests').doc(id).update({status:st});}
 
-// --- DRIVER ---
-function driverView(){
-  setView(`<div class="card"><div class="row"><b>سڵاو شۆفێر ${esc(me.name)}</b><button class="sec smallBtn" id="out">دەرچوون</button></div><p class="small">تەنیا داوای ئامادە دەبینیت</p></div><div class="card"><b>داوای تەکسی</b><div id="taxi"></div></div><div class="card"><b>داوای گەیاندنی ئامادە 🍽️</b><div id="ready"></div></div><div class="card"><b>داواکانی من</b><div id="mineD"></div></div>`);
-  $('out').onclick=logout;
-  if(me.type==='taxi' || !me.type){
-    unsubs.push(db.collection('requests').where('type','==','taxi').where('status','==','pending').onSnapshot(s=>{$('taxi').innerHTML=s.empty?'<p class="small">هیچ داوایەکی تەکسی نیە</p>':s.docs.map(d=>{let r=d.data();return `<div class="card"><b>${esc(r.title)}</b><div class="small">${esc(r.name)} - ${esc(r.phone)}</div><button class="smallBtn" onclick="takeOrder('${d.id}')">وەریدەگرم</button></div>`}).join('')}));
-  }
-  unsubs.push(db.collection('requests').where('type','==','order').where('status','==','ready').onSnapshot(s=>{$('ready').innerHTML=s.empty?'<p class="small">هیچ خواردنێکی ئامادە نیە</p>':s.docs.map(d=>{let r=d.data();return `<div class="card"><b>گەیاندن - ${r.total?.toLocaleString()} دینار (گەیاندن 1000)</b><div class="small">${r.items?r.items.map(i=>i.name+' x'+i.qty).join(', '):''}</div><div class="small">ناونیشان: ${esc(r.address||'')}</div><button class="smallBtn" onclick="takeOrder('${d.id}')">🚗 وەریدەگرم</button></div>`}).join('')}));
-  unsubs.push(db.collection('requests').where('driverPhone','==',me.phone).orderBy('createdAt','desc').limit(10).onSnapshot(s=>{$('mineD').innerHTML=s.empty?'<p class="small">هیچ داوایەک نیە</p>':s.docs.map(d=>{let r=d.data();let btn='';if(r.status==='driver_accepted') btn=`<button class="smallBtn" onclick="changeStatus('${d.id}','delivering')">لە ڕێگام</button>`;if(r.status==='delivering') btn=`<button class="smallBtn" onclick="changeStatus('${d.id}','delivered')">✅ گەیشتم</button>`;return `<div class="card"><b>${esc(r.title)}</b><div>${statusLabel(r.status)}</div>${btn}</div>`}).join('')}));
+@keyframes fadeIn{
+  from{opacity:0;transform:translateY(7px)}
+  to{opacity:1;transform:translateY(0)}
 }
-window.takeOrder=async(id)=>{await db.collection('requests').doc(id).update({status:'driver_accepted',driverPhone:me.phone,driverName:me.name});alert('وەرتگرت!')}
 
-// --- ADMIN ---
-function adminView(){setView(`<div class="card"><div class="row"><b>پانێڵی بەڕێوەبەر</b><button class="sec smallBtn" id="out">دەرچوون</button></div><button id="addShopBtn">+ دووکانی نوێ زیاد بکە</button><button class="sec" id="reqs">داواکارییەکان</button><button class="blue" id="acc">📊 ژووری حسابات</button></div><div class="card"><b>دووکانەکان</b><div id="shops"></div></div>`);
-  $('out').onclick=logout;$('addShopBtn').onclick=addShopForm;$('reqs').onclick=adminRequests;$('acc').onclick=accountingView;
-  unsubs.push(db.collection('shops').onSnapshot(s=>{ $('shops').innerHTML=s.empty?'<p class="small">هیچ دووکانێک نیە</p>':s.docs.map(d=>{let sh=d.data();return `<div class="card"><div class="row">${sh.image?`<img class="item-img" src="${sh.image}">`:''}<div style="flex:1"><b>${esc(sh.name)}</b><div class="small">${sh.category==='food'?'خواردەمەنی':'دووکانی تر'} - ${sh.open?'کراوە':'داخراو'}</div><div class="small">خاوەن: ${esc(sh.ownerPhone||'بێ خاوەن')} | ${esc(sh.desc||'')}</div></div></div><div class="row"><button class="smallBtn edit" onclick="editShop('${d.id}')">دەستکاری دووکان</button><button class="smallBtn" onclick="manageItems('${d.id}','${esc(sh.name)}',false)">نرخ و مێنیو</button><button class="smallBtn danger" onclick="delShop('${d.id}')">سڕینەوە</button></div></div>`}).join('')})); }
-function addShopForm(){setView(`<div class="card"><h3>دووکانی نوێ</h3><input id="sName" placeholder="ناوی دووکان"><input id="sImg" placeholder="لینکی وێنە"><input id="sOwner" placeholder="ژمارەی خاوەن دووکان - 0770... (گرنگە!)"><input id="sPhone" placeholder="ژمارەی دووکان"><textarea id="sDesc" placeholder="وەسف"></textarea><select id="sCat"><option value="food">خواردەمەنی</option><option value="shop">دووکانی تر</option></select><select id="sOpen"><option value="true">کراوە</option><option value="false">داخراو</option></select><button id="save">پاشەکەوتکردن</button><button class="sec" id="back">گەڕانەوە</button></div>`); $('back').onclick=adminView;$('save').onclick=async()=>{let name=$('sName').value.trim();if(!name) return alert('ناو بنووسە');await db.collection('shops').add({name,image:$('sImg').value.trim(),ownerPhone:$('sOwner').value.replace(/\D/g,''),phone:$('sPhone').value.trim(),desc:$('sDesc').value.trim(),category:$('sCat').value,open:$('sOpen').value==='true',createdAt:firebase.firestore.FieldValue.serverTimestamp()});alert('دووکان زیادکرا');adminView()}}
-window.editShop=async(id)=>{let d=await db.collection('shops').doc(id).get();let sh=d.data();setView(`<div class="card"><h3>دەستکاری دووکان</h3><input id="sName" value="${esc(sh.name)}"><input id="sImg" value="${esc(sh.image||'')}" placeholder="لینکی وێنە"><input id="sOwner" value="${esc(sh.ownerPhone||'')}" placeholder="ژمارەی خاوەن دووکان"><input id="sPhone" value="${esc(sh.phone||'')}"><textarea id="sDesc">${esc(sh.desc||'')}</textarea><select id="sCat"><option value="food" ${sh.category==='food'?'selected':''}>خواردەمەنی</option><option value="shop" ${sh.category==='shop'?'selected':''}>دووکانی تر</option></select><select id="sOpen"><option value="true" ${sh.open?'selected':''}>کراوە</option><option value="false" ${!sh.open?'selected':''}>داخراو</option></select><button id="save">پاشەکەوتکردن</button><button class="sec" id="back">گەڕانەوە</button></div>`); $('back').onclick=adminView;$('save').onclick=async()=>{await db.collection('shops').doc(id).update({name:$('sName').value.trim(),image:$('sImg').value.trim(),ownerPhone:$('sOwner').value.replace(/\D/g,''),phone:$('sPhone').value.trim(),desc:$('sDesc').value.trim(),category:$('sCat').value,open:$('sOpen').value==='true'});alert('گۆڕانکاری پاشەکەوت کرا');adminView()}}
-window.delShop=async(id)=>{if(!confirm('دڵنیایت دەتەوێت بیسڕیتەوە؟')) return;await db.collection('shops').doc(id).delete();alert('سڕایەوە')}
-
-// Manage Items - بەکارە بۆ ئەدمین و خاوەن دووکان
-window.manageItems=(shopId,shopName,isOwner)=>{
-  setView(`<div class="card"><h3>مێنیو - ${esc(shopName)}</h3><input id="iName" placeholder="ناوی خواردن - پیتزا"><input id="iPrice" type="number" placeholder="نرخ - 7500"><input id="iImg" placeholder="لینکی وێنە"><input id="iDesc" placeholder="وەسف"><button id="add">+ زیادکردن</button></div><div class="card"><b>لیستی مێنیو</b><div id="list"></div></div><button class="sec" id="back">گەڕانەوە</button>`);
-  $('back').onclick=()=>{ if(isOwner) shopOwnerView(); else adminView(); };
-  $('add').onclick=async()=>{let name=$('iName').value.trim(),price=Number($('iPrice').value);if(!name||!price) return alert('ناو و نرخ بنووسە');await db.collection('shops').doc(shopId).collection('items').add({name,price,image:$('iImg').value.trim(),desc:$('iDesc').value.trim(),available:true,createdAt:firebase.firestore.FieldValue.serverTimestamp()});$('iName').value='';$('iPrice').value='';$('iImg').value='';$('iDesc').value='';alert('زیادکرا')};
-  unsubs.push(db.collection('shops').doc(shopId).collection('items').onSnapshot(s=>{ $('list').innerHTML=s.empty?'<p class="small">هیچ شتێک نیە</p>':s.docs.map(d=>{let it=d.data();return `<div class="card"><div class="row">${it.image?`<img class="item-img" src="${it.image}">`:''}<div style="flex:1"><b>${esc(it.name)}</b><div class="price">${Number(it.price).toLocaleString()} دینار</div></div><button class="smallBtn edit" onclick="editItem('${shopId}','${d.id}')">گۆڕینی نرخ</button><button class="smallBtn danger" onclick="delItem('${shopId}','${d.id}')">سڕینەوە</button></div></div>`}).join('')})); }
-window.editItem=async(shopId,itemId)=>{let d=await db.collection('shops').doc(shopId).collection('items').doc(itemId).get();let it=d.data();let newPrice=prompt('نرخی نوێ بنووسە:',it.price);if(newPrice===null) return;let newName=prompt('ناوی نوێ:',it.name);await db.collection('shops').doc(shopId).collection('items').doc(itemId).update({price:Number(newPrice),name:newName||it.name});alert('نرخ گۆڕدرا')}
-window.delItem=async(shopId,itemId)=>{if(!confirm('بیسڕمەوە؟')) return;await db.collection('shops').doc(shopId).collection('items').doc(itemId).delete()}
-
-function adminRequests(){setView(`<div class="card"><h3>داواکارییەکان - هەموو</h3><div id="list"></div><button class="sec" id="back">گەڕانەوە</button></div>`);$('back').onclick=adminView;unsubs.push(db.collection('requests').orderBy('createdAt','desc').limit(50).onSnapshot(s=>{$('list').innerHTML=s.docs.map(d=>{let r=d.data();return `<div class="card"><b>${esc(r.title)}</b><div class="small">${esc(r.name)} - ${esc(r.phone)} - ${r.total?r.total.toLocaleString()+' دینار':''} - ${statusLabel(r.status)}</div><div class="small">${r.items?r.items.map(i=>i.name+' x'+i.qty).join(', '):''}</div><div class="small">شۆفێر: ${esc(r.driverName||'-')}</div></div>`}).join('')}))}
-
-// --- ژووری حسابات - تەنیا ئەدمین ---
-function accountingView(){
-  setView(`<div class="card"><h3>📊 ژووری حسابات - تەنیا ئەدمین</h3><label>ڕۆژ هەڵبژێرە</label><input type="date" id="accDate"><button id="loadAcc">بینین</button><button class="sec" id="back">گەڕانەوە</button></div><div id="accResult"></div>`);
-  $('back').onclick=adminView;
-  let today=new Date().toISOString().slice(0,10); $('accDate').value=today;
-  const load=async()=>{
-    let dateStr=$('accDate').value; let start=new Date(dateStr+'T00:00:00'); let end=new Date(dateStr+'T23:59:59');
-    let snap=await db.collection('requests').where('createdAt','>=',start).where('createdAt','<=',end).get();
-    let orders=snap.docs.map(d=>d.data());
-    let delivered=orders.filter(o=>o.status==='delivered');
-    let totalSales=delivered.reduce((a,o)=>a+(o.subtotal||o.total||0),0);
-    let totalDelivery=delivered.reduce((a,o)=>a+(o.deliveryFee||0),0);
-    let totalAll=delivered.reduce((a,o)=>a+(o.total||0),0);
-    let byShop={}; delivered.forEach(o=>{let k=o.shopId||'تەکسی'; byShop[k]=(byShop[k]||0)+(o.subtotal||0)});
-    let byDriver={}; delivered.forEach(o=>{if(o.driverName){byDriver[o.driverName]=(byDriver[o.driverName]||0)+1}});
-    $('accResult').innerHTML=`<div class="card"><div class="row"><div class="stat"><b>${orders.length}</b><div class="small">کۆی داوا</div></div><div class="stat"><b>${delivered.length}</b><div class="small">تەواوبوو</div></div><div class="stat"><b>${totalAll.toLocaleString()}</b><div class="small">کۆی پارە</div></div></div><hr><div class="row"><span>فرۆشی خواردن</span><b>${totalSales.toLocaleString()} دینار</b></div><div class="row"><span>گەیاندن (1000 x ${delivered.length})</span><b>${totalDelivery.toLocaleString()} دینار</b></div><div class="row"><span>کۆی گشتی</span><b>${totalAll.toLocaleString()} دینار</b></div><hr><b>بەپێی دووکان</b><div>${Object.entries(byShop).map(([k,v])=>`<div class="row"><span>${esc(k)}</span><span>${v.toLocaleString()}</span></div>`).join('')||'هیچ'}</div><hr><b>بەپێی شۆفێر</b><div>${Object.entries(byDriver).map(([k,v])=>`<div class="row"><span>${esc(k)}</span><span>${v} گەیاندن</span></div>`).join('')||'هیچ'}</div></div><div class="card"><b>هەموو داواکانی ئەم ڕۆژە</b>${orders.map(o=>`<div class="row"><span>${esc(o.title)} - ${esc(o.name)}</span><span>${(o.total||0).toLocaleString()} - ${statusLabel(o.status)}</span></div>`).join('')||'هیچ'}</div>`;
-  };
-  $('loadAcc').onclick=load; load();
+h3{
+  font-size:19px;
+  margin:4px 0 17px;
+  color:var(--dark);
 }
-start();
-</script>
-</body>
-</html>
+
+.shop-img{
+  width:100%;
+  height:175px;
+  object-fit:cover;
+  border-radius:15px;
+  background:#edf1ee;
+}
+
+.item-img{
+  width:82px;
+  height:82px;
+  object-fit:cover;
+  border-radius:14px;
+  background:#edf1ee;
+}
+
+input,select,textarea{
+  width:100%;
+  padding:14px;
+  margin:7px 0;
+  border:1px solid #e0e8e2;
+  border-radius:13px;
+  font-family:Tahoma,sans-serif;
+  font-size:15px;
+  background:#fbfdfb;
+  color:var(--text);
+  outline:none;
+  transition:.2s;
+}
+
+input:focus,select:focus,textarea:focus{
+  border-color:var(--green);
+  box-shadow:0 0 0 3px rgba(22,131,74,.09);
+  background:white;
+}
+
+textarea{
+  min-height:85px;
+  resize:vertical;
+}
+
+button{
+  width:100%;
+  padding:14px;
+  margin:7px 0;
+  border:0;
+  border-radius:13px;
+  background:var(--green);
+  color:white;
+  font-family:Tahoma,sans-serif;
+  font-size:15px;
+  font-weight:bold;
+  cursor:pointer;
+  transition:transform .15s,opacity .15s;
+}
+
+button:active{
+  transform:scale(.97);
+  opacity:.85;
+}
+
+button.sec{background:#64736a}
+button.blue{background:#2879bd}
+button.danger{background:var(--red)}
+button.edit{background:#e99a25}
+
+button.smallBtn{
+  width:auto;
+  padding:9px 13px;
+  font-size:12px;
+  margin:3px;
+  border-radius:10px;
+}
+
+.row{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  justify-content:space-between;
+}
+
+.small{
+  font-size:12px;
+  color:var(--muted);
+  line-height:1.9;
+}
+
+.price{
+  font-weight:bold;
+  color:var(--green);
+  font-size:17px;
+  margin-top:5px;
+}
+
+.badge{
+  background:#e5f6eb;
+  color:#16834a;
+  padding:6px 11px;
+  border-radius:30px;
+  font-size:11px;
+  white-space:nowrap;
+}
+
+.badge-warn{
+  background:#fff4db;
+  color:#b77912;
+  padding:6px 11px;
+  border-radius:30px;
+  font-size:11px;
+}
+
+.cart-bar{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  background:linear-gradient(135deg,#16834a,#0d6338);
+  color:white;
+  padding:17px;
+  padding-bottom:calc(17px + env(safe-area-inset-bottom));
+  text-align:center;
+  font-weight:bold;
+  cursor:pointer;
+  z-index:200;
+  box-shadow:0 -5px 20px rgba(0,0,0,.12);
+  border-radius:18px 18px 0 0;
+}
+
+.stat{
+  background:var(--light);
+  border:1px solid #d9eee0;
+  border-radius:14px;
+  padding:13px 7px;
+  text-align:center;
+  flex:1;
+  color:var(--dark);
+  min-width:0;
+}
+
+hr{
+  border:0;
+  border-top:1px solid var(--border);
+  margin:15px 0;
+}
+
+img{
+  max-width:100%;
+}
+
+@media(max-width:380px){
+  main{padding-left:9px;padding-right:9px}
+  .card{padding:13px}
+  .row{gap:6px}
+  button.smallBtn{padding:8px;font-size:11px}
+}
