@@ -1,137 +1,147 @@
+<!DOCTYPE html>
+<html lang="ckb" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>دەلاکە</title>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<style>
 *,*::before,*::after{box-sizing:border-box}
-
-:root{
-  color-scheme:light dark;
-  --green:#16834a;--dark:#10663a;--green-deep:#0d6338;
-  --light:#eaf7ef;--bg:#f4f7f5;--surface:#fff;--field:#fbfdfb;
-  --text:#202b25;--muted:#5f6b64;--border:#e8eee9;--field-border:#dbe4de;
-  --red:#d94343;--blue:#2879bd;--orange:#e99a25;--gray-btn:#64736a;
-  --img-bg:#edf1ee;--stat-border:#d9eee0;--badge-bg:#e5f6eb;
-  --warn-bg:#fff4db;--warn-text:#8a5a0a;
-  --shadow:0 5px 20px rgba(20,80,45,.07);
-  --font:"Vazirmatn","Noto Sans Arabic","Segoe UI",Tahoma,system-ui,sans-serif;
-}
-@media (prefers-color-scheme:dark){
-  :root{
-    --green:#2fae6b;--dark:#6fd9a0;--light:#173024;--bg:#0f1612;
-    --surface:#17211b;--field:#1c2822;--text:#e8f0ea;--muted:#9aa8a0;
-    --border:#25322b;--field-border:#304037;--img-bg:#22302a;
-    --stat-border:#25402f;--badge-bg:#1d3a2a;--warn-bg:#3a2f14;
-    --warn-text:#f0c36a;--shadow:0 5px 20px rgba(0,0,0,.35);
-  }
-}
-
-html{-webkit-text-size-adjust:100%}
-
-body{
-  margin:0;font-family:var(--font);line-height:1.6;
-  background:var(--bg);color:var(--text);direction:rtl;
-  -webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased;
-}
-
-header{
-  position:sticky;top:0;z-index:100;
-  padding:calc(20px + env(safe-area-inset-top)) 15px 20px;
-  background:linear-gradient(135deg,var(--green),var(--green-deep));
-  color:#fff;text-align:center;font-size:24px;font-weight:700;letter-spacing:.3px;
-  box-shadow:0 4px 15px rgba(0,0,0,.12);
-}
-
-main{
-  max-width:560px;margin:16px auto;
-  padding:0 13px calc(110px + env(safe-area-inset-bottom));
-}
-
-.card{
-  margin-bottom:14px;padding:17px;background:var(--surface);
-  border:1px solid var(--border);border-radius:19px;box-shadow:var(--shadow);
-}
-@media (prefers-reduced-motion:no-preference){
-  .card{animation:fadeIn .25s ease both}
-}
-@keyframes fadeIn{
-  from{opacity:0;transform:translateY(7px)}
-  to{opacity:1;transform:translateY(0)}
-}
-
-h3{margin:4px 0 17px;font-size:19px;line-height:1.4;color:var(--dark)}
-
-.shop-img{
-  display:block;width:100%;height:175px;object-fit:cover;
-  border-radius:15px;background:var(--img-bg);
-}
-.item-img{
-  flex-shrink:0;width:82px;height:82px;object-fit:cover;
-  border-radius:14px;background:var(--img-bg);
-}
-img{max-width:100%;height:auto}
-
+:root{--green:#16834a;--dark:#10663a;--green-deep:#0d6338;--light:#eaf7ef;--bg:#f4f7f5;--surface:#fff;--field:#fbfdfb;--text:#202b25;--muted:#5f6b64;--border:#e8eee9;--field-border:#dbe4de;--red:#d94343;--blue:#2879bd;--orange:#e99a25;--gray-btn:#64736a;--img-bg:#edf1ee;--stat-border:#d9eee0;--badge-bg:#e5f6eb;--warn-bg:#fff4db;--warn-text:#8a5a0a;--shadow:0 5px 20px rgba(20,80,45,.07);--font:"Vazirmatn","Noto Sans Arabic","Segoe UI",Tahoma,system-ui,sans-serif}
+body{margin:0;font-family:var(--font);line-height:1.6;background:var(--bg);color:var(--text);direction:rtl}
+header{position:sticky;top:0;z-index:100;padding:20px 15px;background:linear-gradient(135deg,var(--green),var(--green-deep));color:#fff;text-align:center;font-size:24px;font-weight:700}
+main{max-width:560px;margin:16px auto;padding:0 13px 110px}
+.card{margin-bottom:14px;padding:17px;background:var(--surface);border:1px solid var(--border);border-radius:19px;box-shadow:var(--shadow)}
+h3{margin:4px 0 17px;font-size:19px;color:var(--dark)}
+.shop-img{display:block;width:100%;height:175px;object-fit:cover;border-radius:15px;background:var(--img-bg)}
 input,select,textarea,button{font-family:inherit}
-
-input,select,textarea{
-  display:block;width:100%;margin:7px 0;padding:14px;
-  font-size:16px;color:var(--text);background:var(--field);
-  border:1px solid var(--field-border);border-radius:13px;outline:none;
-  transition:border-color .2s,box-shadow .2s,background-color .2s;
-}
-input::placeholder,textarea::placeholder{color:var(--muted);opacity:.8}
-input:focus,select:focus,textarea:focus{
-  border-color:var(--green);background:var(--surface);
-  box-shadow:0 0 0 3px rgba(22,131,74,.18);
-}
-textarea{min-height:85px;resize:vertical}
-
-button{
-  display:block;width:100%;margin:7px 0;padding:14px;
-  font-size:15px;font-weight:700;color:#fff;background:var(--green);
-  border:0;border-radius:13px;cursor:pointer;touch-action:manipulation;
-  transition:transform .15s,opacity .15s,filter .15s;
-}
-button:hover{filter:brightness(1.06)}
-button:active{transform:scale(.97);opacity:.88}
-button:disabled{opacity:.5;cursor:not-allowed;transform:none;filter:none}
-button:focus-visible,.cart-bar:focus-visible{
-  outline:3px solid rgba(22,131,74,.45);outline-offset:2px;
-}
-button.sec{background:var(--gray-btn)}
-button.blue{background:var(--blue)}
-button.danger{background:var(--red)}
-button.edit{background:var(--orange);color:#2b1b00}
-button.smallBtn{
-  display:inline-block;width:auto;min-height:40px;margin:3px;
-  padding:9px 13px;font-size:12px;border-radius:10px;
-}
-
+input,select,textarea{display:block;width:100%;margin:7px 0;padding:14px;font-size:16px;background:var(--field);border:1px solid var(--field-border);border-radius:13px;outline:none}
+button{display:block;width:100%;margin:7px 0;padding:14px;font-size:15px;font-weight:700;color:#fff;background:var(--green);border:0;border-radius:13px;cursor:pointer}
+button.sec{background:var(--gray-btn)} button.blue{background:var(--blue)} button.danger{background:var(--red)} button.smallBtn{display:inline-block;width:auto;margin:3px;padding:9px 13px;font-size:12px;border-radius:10px}
 .row{display:flex;gap:10px;align-items:center;justify-content:space-between}
-.small{font-size:12px;line-height:1.9;color:var(--muted)}
+.small{font-size:12px;color:var(--muted)}
 .price{margin-top:5px;font-size:17px;font-weight:700;color:var(--green)}
+.badge{display:inline-block;padding:6px 11px;font-size:11px;font-weight:600;border-radius:30px;background:var(--badge-bg);color:var(--green)}
+.file-label{display:block;padding:14px;text-align:center;background:#eaf7ef;border:2px dashed #16834a;border-radius:13px;cursor:pointer;font-weight:700;color:#10663a;margin:7px 0}
+.file-label input{display:none}
+.preview-img{width:100%;height:160px;object-fit:cover;border-radius:13px;display:none;margin:7px 0}
+</style>
+</head>
+<body>
+<header>دەلاکە</header>
+<main id="app"></main>
+<script>
+// ===== 1. لێرە کۆدی Firebase ـەکەی خۆت دابنێ =====
+const firebaseConfig = {
+  apiKey: "لێرە apiKey ـەکەی خۆت دابنێ",
+  authDomain: "لێرە authDomain ـەکەی خۆت دابنێ",
+  projectId: "لێرە projectId ـەکەی خۆت دابنێ",
+  storageBucket: "لێرە storageBucket ـەکەی خۆت دابنێ",
+  messagingSenderId: "لێرە messagingSenderId ـەکەی خۆت دابنێ",
+  appId: "لێرە appId ـەکەی خۆت دابنێ"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+let _sImg = "", _pImg = "";
 
-.badge,.badge-warn{
-  display:inline-block;padding:6px 11px;font-size:11px;font-weight:600;
-  white-space:nowrap;border-radius:30px;
+function fileToBase64(file, cb){
+  const r = new FileReader();
+  r.onload = e => cb(e.target.result);
+  r.readAsDataURL(file);
 }
-.badge{background:var(--badge-bg);color:var(--green)}
-.badge-warn{background:var(--warn-bg);color:var(--warn-text)}
 
-.cart-bar{
-  position:fixed;inset:auto 0 0 0;z-index:200;
-  padding:17px 17px calc(17px + env(safe-area-inset-bottom));
-  text-align:center;font-weight:700;color:#fff;cursor:pointer;
-  background:linear-gradient(135deg,var(--green),var(--green-deep));
-  border-radius:18px 18px 0 0;box-shadow:0 -5px 20px rgba(0,0,0,.12);
+// ===== 2. لیستی دووکانەکان =====
+function showShops(){
+  db.collection('shops').onSnapshot(snap=>{
+    let html = `<div class="card"><h3>دووکانەکان</h3><button onclick="addShopForm()">+ دووکانی نوێ</button></div>`;
+    snap.forEach(doc=>{
+      let s = doc.data(); s.id = doc.id;
+      html += `<div class="card" onclick="openShop('${doc.id}')" style="cursor:pointer">
+        ${s.image?`<img class="shop-img" src="${s.image}">`:''}
+        <div class="row" style="margin-top:10px"><b>${s.name||''}</b><span class="badge">${s.open?'ئێستا کراوەیە':'داخراوە'}</span></div>
+        <div class="small">📍 ${s.location||'شۆڕش'} · ⭐ 0.0</div>
+      </div>`;
+    });
+    document.getElementById('app').innerHTML = html;
+  });
 }
 
-.stat{
-  flex:1;min-width:0;padding:13px 7px;text-align:center;
-  color:var(--dark);background:var(--light);
-  border:1px solid var(--stat-border);border-radius:14px;
+// ===== 3. فۆرمی دووکانی نوێ - وێنە ڕاستەوخۆ =====
+function addShopForm(){
+  _sImg = "";
+  document.getElementById('app').innerHTML = `<div class="card">
+    <h3>دووکانی نوێ</h3>
+    <input id="shopName" placeholder="ناوی دووکان - بۆ نموونە: مریشک فرۆشی شۆڕش">
+    <input id="shopPhone" placeholder="ژمارەی خاوەن دووکان">
+    <input id="shopLocation" placeholder="شوێن - بۆ نموونە: شۆڕش" value="شۆڕش">
+    <label class="file-label">📷 وێنەی دووکان هەڵبژێرە<input type="file" accept="image/*" onchange="fileToBase64(this.files[0], v=>{_sImg=v; document.getElementById('sPrev').src=v; document.getElementById('sPrev').style.display='block'})"></label>
+    <img id="sPrev" class="preview-img">
+    <label><input type="checkbox" id="shopOpen" checked style="display:inline;width:auto"> ئێستا کراوەیە</label>
+    <button onclick="saveShop()">پاشەکەوتکردن</button>
+    <button class="sec" onclick="showShops()">گەڕانەوە</button>
+  </div>`;
+}
+function saveShop(){
+  const name = document.getElementById('shopName').value;
+  if(!name) return alert('ناوی دووکان بنووسە');
+  if(!_sImg) return alert('تکایە وێنەیەک هەڵبژێرە');
+  db.collection('shops').add({name, phone:document.getElementById('shopPhone').value, location:document.getElementById('shopLocation').value, image:_sImg, open:document.getElementById('shopOpen').checked, created:Date.now()}).then(()=>showShops());
 }
 
-hr{margin:15px 0;border:0;border-top:1px solid var(--border)}
-
-@media (max-width:380px){
-  main{padding-left:9px;padding-right:9px}
-  .card{padding:13px}
-  .row{gap:6px}
-  button.smallBtn{padding:8px;font-size:11px}
+// ===== 4. پەیجی دووکان - وەکو ئەو وێنەیەی دەتەوێت =====
+function openShop(id){
+  db.collection('shops').doc(id).get().then(doc=>{
+    let s = doc.data(); s.id = doc.id;
+    document.getElementById('app').innerHTML = `
+    <div style="margin:-16px -13px 0 -13px;position:relative">
+      <img src="${s.image||''}" style="width:100%;height:230px;object-fit:cover;display:block">
+      <div style="position:absolute;bottom:0;right:0;left:0;padding:30px 14px 12px;background:linear-gradient(transparent,rgba(0,0,0,.75));color:#fff">
+        <h2 style="margin:0;font-size:22px">${s.name}</h2>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
+          <span style="background:rgba(0,0,0,.6);padding:5px 10px;border-radius:20px;font-size:12px">⭐ 0.0 · 0 پێداچوونەوە</span>
+          <span style="background:${s.open?'#2e7d32':'#c62828'};padding:5px 10px;border-radius:20px;font-size:12px">${s.open?'ئێستا کراوەیە':'داخراوە'}</span>
+          <span style="background:rgba(0,0,0,.6);padding:5px 10px;border-radius:20px;font-size:12px">🚚 گەیاندن: 1,000</span>
+          <span style="background:rgba(0,0,0,.6);padding:5px 10px;border-radius:20px;font-size:12px">📍 ${s.location||'شۆڕش'}</span>
+        </div>
+      </div>
+    </div>
+    <div style="padding:14px 0"><button onclick="addProductForm('${s.id}')">+ بەرهەمی نوێ زیاد بکە</button><button class="sec" onclick="showShops()">گەڕانەوە بۆ دووکانەکان</button></div>
+    <div id="shopItems" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px"></div>`;
+    db.collection('products').where('shopId','==',id).onSnapshot(snap=>{
+      let html='';
+      snap.forEach(d=>{
+        let p=d.data();
+        html+=`<div style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 2px 10px #0001;position:relative">
+          ${!p.available?'<span style="position:absolute;top:38px;right:6px;background:#c62828;color:#fff;padding:4px 8px;border-radius:10px;font-size:11px;z-index:2">بەردەست نییە</span>':''}
+          <img src="${p.image||''}" style="width:100%;height:110px;object-fit:cover">
+          <div style="background:#111;color:#f5c542;padding:6px;font-size:13px;text-align:center;font-weight:bold">${p.price} / کیلۆگرام</div>
+          <div style="background:#e9b32b;padding:8px;text-align:center;font-weight:bold;font-size:13px">${p.name}</div>
+        </div>`;
+      });
+      document.getElementById('shopItems').innerHTML = html || '<p style="grid-column:1/-1;text-align:center;color:#888">هیچ بەرهەمێک نییە، بەرهەم زیاد بکە</p>';
+    });
+  });
 }
+
+// ===== 5. فۆرمی بەرهەم - وێنە ڕاستەوخۆ =====
+function addProductForm(shopId){
+  _pImg="";
+  document.getElementById('app').innerHTML = `<div class="card"><h3>بەرهەمی نوێ</h3>
+    <input id="pName" placeholder="ناوی بەرهەم - بۆ نموونە: کەڵەشێری پیر">
+    <input id="pPrice" type="number" placeholder="نرخ - بۆ نموونە: 4750">
+    <label><input type="checkbox" id="pAvail" checked style="display:inline;width:auto"> بەردەستە</label>
+    <label class="file-label">📷 وێنەی بەرهەم هەڵبژێرە<input type="file" accept="image/*" onchange="fileToBase64(this.files[0], v=>{_pImg=v; document.getElementById('pPrev').src=v; document.getElementById('pPrev').style.display='block'})"></label>
+    <img id="pPrev" class="preview-img">
+    <button onclick="saveProduct('${shopId}')">پاشەکەوتکردن</button>
+    <button class="sec" onclick="openShop('${shopId}')">گەڕانەوە</button></div>`;
+}
+function saveProduct(shopId){
+  const name=document.getElementById('pName').value;
+  if(!name||!_pImg) return alert('ناو و وێنە پێویستە');
+  db.collection('products').add({shopId, name, price:document.getElementById('pPrice').value, available:document.getElementById('pAvail').checked, image:_pImg}).then(()=>openShop(shopId));
+}
+showShops();
+</script>
+</body>
+</html>
