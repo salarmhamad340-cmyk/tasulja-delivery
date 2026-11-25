@@ -1,147 +1,104 @@
 <!DOCTYPE html>
 <html lang="ckb" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>دەلاکە</title>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>دەلاکە - Delaka</title>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 <style>
-*,*::before,*::after{box-sizing:border-box}
-:root{--green:#16834a;--dark:#10663a;--green-deep:#0d6338;--light:#eaf7ef;--bg:#f4f7f5;--surface:#fff;--field:#fbfdfb;--text:#202b25;--muted:#5f6b64;--border:#e8eee9;--field-border:#dbe4de;--red:#d94343;--blue:#2879bd;--orange:#e99a25;--gray-btn:#64736a;--img-bg:#edf1ee;--stat-border:#d9eee0;--badge-bg:#e5f6eb;--warn-bg:#fff4db;--warn-text:#8a5a0a;--shadow:0 5px 20px rgba(20,80,45,.07);--font:"Vazirmatn","Noto Sans Arabic","Segoe UI",Tahoma,system-ui,sans-serif}
-body{margin:0;font-family:var(--font);line-height:1.6;background:var(--bg);color:var(--text);direction:rtl}
-header{position:sticky;top:0;z-index:100;padding:20px 15px;background:linear-gradient(135deg,var(--green),var(--green-deep));color:#fff;text-align:center;font-size:24px;font-weight:700}
-main{max-width:560px;margin:16px auto;padding:0 13px 110px}
-.card{margin-bottom:14px;padding:17px;background:var(--surface);border:1px solid var(--border);border-radius:19px;box-shadow:var(--shadow)}
-h3{margin:4px 0 17px;font-size:19px;color:var(--dark)}
-.shop-img{display:block;width:100%;height:175px;object-fit:cover;border-radius:15px;background:var(--img-bg)}
-input,select,textarea,button{font-family:inherit}
-input,select,textarea{display:block;width:100%;margin:7px 0;padding:14px;font-size:16px;background:var(--field);border:1px solid var(--field-border);border-radius:13px;outline:none}
-button{display:block;width:100%;margin:7px 0;padding:14px;font-size:15px;font-weight:700;color:#fff;background:var(--green);border:0;border-radius:13px;cursor:pointer}
-button.sec{background:var(--gray-btn)} button.blue{background:var(--blue)} button.danger{background:var(--red)} button.smallBtn{display:inline-block;width:auto;margin:3px;padding:9px 13px;font-size:12px;border-radius:10px}
-.row{display:flex;gap:10px;align-items:center;justify-content:space-between}
-.small{font-size:12px;color:var(--muted)}
-.price{margin-top:5px;font-size:17px;font-weight:700;color:var(--green)}
-.badge{display:inline-block;padding:6px 11px;font-size:11px;font-weight:600;border-radius:30px;background:var(--badge-bg);color:var(--green)}
+*{box-sizing:border-box} body{margin:0;font-family:"Vazirmatn",Tahoma,sans-serif;background:#f4f7f5;direction:rtl}
+header{position:sticky;top:0;z-index:10;padding:18px;text-align:center;background:linear-gradient(135deg,#16834a,#0d6338);color:#fff;font-size:22px;font-weight:800}
+main{max-width:560px;margin:auto;padding:14px 13px 100px}
+.card{background:#fff;border-radius:19px;padding:17px;margin-bottom:14px;box-shadow:0 5px 20px rgba(20,80,45,.07)}
+button{width:100%;padding:14px;margin:7px 0;border:0;border-radius:13px;background:#16834a;color:#fff;font-weight:700;font-size:15px;cursor:pointer}
+button.sec{background:#64736a} button.blue{background:#2879bd} button.danger{background:#d94343} button.orange{background:#e99a25;color:#222}
+button.smallBtn{width:auto;display:inline-block;padding:9px 12px;font-size:12px;margin:3px}
+input,select,textarea{width:100%;padding:14px;margin:7px 0;border:1px solid #dbe4de;border-radius:13px;font-size:16px}
+.shop-img{width:100%;height:175px;object-fit:cover;border-radius:15px}
+.role-card{padding:28px 18px;text-align:center;cursor:pointer;border:2px solid #eaf7ef}
+.role-card b{font-size:20px} .role-card p{color:#666;font-size:13px;margin:5px 0 0}
+.badge{display:inline-block;padding:5px 11px;border-radius:20px;font-size:11px;background:#e5f6eb;color:#16834a}
 .file-label{display:block;padding:14px;text-align:center;background:#eaf7ef;border:2px dashed #16834a;border-radius:13px;cursor:pointer;font-weight:700;color:#10663a;margin:7px 0}
-.file-label input{display:none}
-.preview-img{width:100%;height:160px;object-fit:cover;border-radius:13px;display:none;margin:7px 0}
+.file-label input{display:none} .preview-img{width:100%;height:160px;object-fit:cover;border-radius:13px;display:none;margin:7px 0}
+.order-box{border:1px solid #eee;border-radius:14px;padding:12px;margin:8px 0}
 </style>
 </head>
 <body>
 <header>دەلاکە</header>
 <main id="app"></main>
 <script>
-// ===== 1. لێرە کۆدی Firebase ـەکەی خۆت دابنێ =====
-const firebaseConfig = {
-  apiKey: "لێرە apiKey ـەکەی خۆت دابنێ",
-  authDomain: "لێرە authDomain ـەکەی خۆت دابنێ",
-  projectId: "لێرە projectId ـەکەی خۆت دابنێ",
-  storageBucket: "لێرە storageBucket ـەکەی خۆت دابنێ",
-  messagingSenderId: "لێرە messagingSenderId ـەکەی خۆت دابنێ",
-  appId: "لێرە appId ـەکەی خۆت دابنێ"
-};
+const firebaseConfig = { apiKey:"لێرە کۆدی خۆت دابنێ", authDomain:"لێرە", projectId:"لێرە", storageBucket:"لێرە", messagingSenderId:"لێرە", appId:"لێرە" };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-let _sImg = "", _pImg = "";
+let _sImg="", _pImg="", cart=[], currentShop=null;
+let myRole = localStorage.getItem('delaka_role') || "";
+let deliveryName = localStorage.getItem('delaka_delivery') || "";
 
-function fileToBase64(file, cb){
-  const r = new FileReader();
-  r.onload = e => cb(e.target.result);
-  r.readAsDataURL(file);
+function fileToBase64(f,cb){ const r=new FileReader(); r.onload=e=>cb(e.target.result); r.readAsDataURL(f); }
+
+// ===== 0. سەرەتا - 3 بەش =====
+function home(){
+  document.getElementById('app').innerHTML = `
+  <div class="card" style="text-align:center"><h2 style="margin:0">بەخێربێیت بۆ دەلاکە 👋</h2><p style="color:#666">کام بەشیت دەوێت؟</p></div>
+  <div class="card role-card" onclick="enterCustomer()"><div style="font-size:40px">🛒</div><b>کڕیار</b><p>دووکانەکان ببینە و داوا بکە</p></div>
+  <div class="card role-card" onclick="enterAdmin()"><div style="font-size:40px">👑</div><b>ئەدمین</b><p>دووکان و نرخ بەڕێوەببە - تەنیا خاوەن</p></div>
+  <div class="card role-card" onclick="enterDelivery()"><div style="font-size:40px">🛵</div><b>دلیڤەری</b><p>تەڵەب قبوڵ بکە و بیگەیەنە</p></div>
+  ${myRole?`<button class="sec" onclick="localStorage.clear();home()">دەرچوون / گۆڕینی بەش</button>`:''}`;
 }
 
-// ===== 2. لیستی دووکانەکان =====
+// ===== 1. کڕیار =====
+function enterCustomer(){ myRole='customer'; localStorage.setItem('delaka_role','customer'); showShops(); }
 function showShops(){
   db.collection('shops').onSnapshot(snap=>{
-    let html = `<div class="card"><h3>دووکانەکان</h3><button onclick="addShopForm()">+ دووکانی نوێ</button></div>`;
-    snap.forEach(doc=>{
-      let s = doc.data(); s.id = doc.id;
-      html += `<div class="card" onclick="openShop('${doc.id}')" style="cursor:pointer">
-        ${s.image?`<img class="shop-img" src="${s.image}">`:''}
-        <div class="row" style="margin-top:10px"><b>${s.name||''}</b><span class="badge">${s.open?'ئێستا کراوەیە':'داخراوە'}</span></div>
-        <div class="small">📍 ${s.location||'شۆڕش'} · ⭐ 0.0</div>
-      </div>`;
-    });
-    document.getElementById('app').innerHTML = html;
+    let html=`<button class="sec" onclick="home()">← گەڕانەوە بۆ سەرەتا</button><div class="card"><h3>دووکانەکان</h3></div>`;
+    snap.forEach(d=>{ let s=d.data(); html+=`<div class="card" onclick="openShop('${d.id}')" style="cursor:pointer">${s.image?`<img class="shop-img" src="${s.image}">`:''}<div style="display:flex;justify-content:space-between;margin-top:10px"><b>${s.name}</b><span class="badge">${s.open?'🟢 کراوەیە':'🔴 داخراوە'}</span></div><div style="color:#888;font-size:12px">📍 ${s.location||'شۆڕش'} · ⭐ 0.0 · گەیاندن 1,000</div></div>`; });
+    document.getElementById('app').innerHTML=html;
   });
 }
-
-// ===== 3. فۆرمی دووکانی نوێ - وێنە ڕاستەوخۆ =====
-function addShopForm(){
-  _sImg = "";
-  document.getElementById('app').innerHTML = `<div class="card">
-    <h3>دووکانی نوێ</h3>
-    <input id="shopName" placeholder="ناوی دووکان - بۆ نموونە: مریشک فرۆشی شۆڕش">
-    <input id="shopPhone" placeholder="ژمارەی خاوەن دووکان">
-    <input id="shopLocation" placeholder="شوێن - بۆ نموونە: شۆڕش" value="شۆڕش">
-    <label class="file-label">📷 وێنەی دووکان هەڵبژێرە<input type="file" accept="image/*" onchange="fileToBase64(this.files[0], v=>{_sImg=v; document.getElementById('sPrev').src=v; document.getElementById('sPrev').style.display='block'})"></label>
-    <img id="sPrev" class="preview-img">
-    <label><input type="checkbox" id="shopOpen" checked style="display:inline;width:auto"> ئێستا کراوەیە</label>
-    <button onclick="saveShop()">پاشەکەوتکردن</button>
-    <button class="sec" onclick="showShops()">گەڕانەوە</button>
-  </div>`;
-}
-function saveShop(){
-  const name = document.getElementById('shopName').value;
-  if(!name) return alert('ناوی دووکان بنووسە');
-  if(!_sImg) return alert('تکایە وێنەیەک هەڵبژێرە');
-  db.collection('shops').add({name, phone:document.getElementById('shopPhone').value, location:document.getElementById('shopLocation').value, image:_sImg, open:document.getElementById('shopOpen').checked, created:Date.now()}).then(()=>showShops());
-}
-
-// ===== 4. پەیجی دووکان - وەکو ئەو وێنەیەی دەتەوێت =====
 function openShop(id){
   db.collection('shops').doc(id).get().then(doc=>{
-    let s = doc.data(); s.id = doc.id;
-    document.getElementById('app').innerHTML = `
-    <div style="margin:-16px -13px 0 -13px;position:relative">
-      <img src="${s.image||''}" style="width:100%;height:230px;object-fit:cover;display:block">
-      <div style="position:absolute;bottom:0;right:0;left:0;padding:30px 14px 12px;background:linear-gradient(transparent,rgba(0,0,0,.75));color:#fff">
-        <h2 style="margin:0;font-size:22px">${s.name}</h2>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
-          <span style="background:rgba(0,0,0,.6);padding:5px 10px;border-radius:20px;font-size:12px">⭐ 0.0 · 0 پێداچوونەوە</span>
-          <span style="background:${s.open?'#2e7d32':'#c62828'};padding:5px 10px;border-radius:20px;font-size:12px">${s.open?'ئێستا کراوەیە':'داخراوە'}</span>
-          <span style="background:rgba(0,0,0,.6);padding:5px 10px;border-radius:20px;font-size:12px">🚚 گەیاندن: 1,000</span>
-          <span style="background:rgba(0,0,0,.6);padding:5px 10px;border-radius:20px;font-size:12px">📍 ${s.location||'شۆڕش'}</span>
-        </div>
-      </div>
-    </div>
-    <div style="padding:14px 0"><button onclick="addProductForm('${s.id}')">+ بەرهەمی نوێ زیاد بکە</button><button class="sec" onclick="showShops()">گەڕانەوە بۆ دووکانەکان</button></div>
-    <div id="shopItems" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px"></div>`;
+    let s=doc.data(); currentShop={id:doc.id,...s};
+    document.getElementById('app').innerHTML=`
+    <div style="margin:-14px -13px 0;position:relative"><img src="${s.image||''}" style="width:100%;height:230px;object-fit:cover"><div style="position:absolute;bottom:0;left:0;right:0;padding:30px 14px 12px;background:linear-gradient(transparent,rgba(0,0,0,.75));color:#fff"><h2 style="margin:0">${s.name}</h2><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px"><span class="badge" style="background:#000a;color:#fff">⭐ 0.0</span><span class="badge" style="background:${s.open?'#2e7d32':'#c62828'};color:#fff">${s.open?'ئێستا کراوەیە':'داخراوە'}</span><span class="badge" style="background:#000a;color:#fff">📍 ${s.location||'شۆڕش'}</span></div></div></div>
+    <button class="sec" onclick="showShops()">گەڕانەوە</button><div id="items" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:10px"></div><div id="cartBar"></div>`;
     db.collection('products').where('shopId','==',id).onSnapshot(snap=>{
-      let html='';
-      snap.forEach(d=>{
-        let p=d.data();
-        html+=`<div style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 2px 10px #0001;position:relative">
-          ${!p.available?'<span style="position:absolute;top:38px;right:6px;background:#c62828;color:#fff;padding:4px 8px;border-radius:10px;font-size:11px;z-index:2">بەردەست نییە</span>':''}
-          <img src="${p.image||''}" style="width:100%;height:110px;object-fit:cover">
-          <div style="background:#111;color:#f5c542;padding:6px;font-size:13px;text-align:center;font-weight:bold">${p.price} / کیلۆگرام</div>
-          <div style="background:#e9b32b;padding:8px;text-align:center;font-weight:bold;font-size:13px">${p.name}</div>
-        </div>`;
-      });
-      document.getElementById('shopItems').innerHTML = html || '<p style="grid-column:1/-1;text-align:center;color:#888">هیچ بەرهەمێک نییە، بەرهەم زیاد بکە</p>';
+      let h=''; snap.forEach(d=>{ let p=d.data(); h+=`<div style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 2px 10px #0001;position:relative">${!p.available?'<span style="position:absolute;top:38px;right:6px;background:#c62828;color:#fff;padding:4px 8px;border-radius:10px;font-size:11px">بەردەست نییە</span>':''}<img src="${p.image||''}" style="width:100%;height:110px;object-fit:cover"><div style="background:#111;color:#f5c542;padding:6px;text-align:center;font-weight:bold;font-size:13px">${p.price} / کیلۆگرام</div><div style="background:#e9b32b;padding:8px;text-align:center;font-weight:bold;font-size:13px">${p.name}</div><button class="smallBtn" style="width:100%;margin:0;border-radius:0" onclick="addToCart('${d.id}','${p.name}',${p.price})" ${!p.available?'disabled':''}>+ زیاد بکە</button></div>`; });
+      document.getElementById('items').innerHTML=h||'<p>هیچ بەرهەمێک نییە</p>'; updateCartBar();
     });
   });
 }
+function addToCart(id,name,price){ let f=cart.find(c=>c.id==id); if(f) f.qty++; else cart.push({id,name,price,qty:1}); updateCartBar(); }
+function updateCartBar(){ let total=cart.reduce((a,c)=>a+c.price*c.qty,0); let count=cart.reduce((a,c)=>a+c.qty,0); document.getElementById('cartBar').innerHTML = count? `<div style="position:fixed;bottom:0;left:0;right:0;background:#16834a;color:#fff;padding:16px;text-align:center;font-weight:800;cursor:pointer" onclick="checkout()">🛒 ${count} دانە · ${total+1000} (لەگەڵ گەیاندن) · کلیک بکە بۆ داواکردن</div>` : ''; }
+function checkout(){
+  let name=prompt('ناوت چییە؟'); if(!name) return;
+  let phone=prompt('ژمارەی مۆبایلت؟'); if(!phone) return;
+  let address=prompt('ناونیشان - بۆ نموونە: شۆڕش، کۆڵانی...'); if(!address) return;
+  let total=cart.reduce((a,c)=>a+c.price*c.qty,0)+1000;
+  db.collection('orders').add({shopId:currentShop.id, shopName:currentShop.name, items:cart, total, customerName:name, phone, address, status:'pending', deliveryName:'', created:Date.now()}).then(()=>{ cart=[]; alert('✅ داواکەت نێردرا! دلیڤەری قبوڵی دەکات'); showShops(); });
+}
 
-// ===== 5. فۆرمی بەرهەم - وێنە ڕاستەوخۆ =====
-function addProductForm(shopId){
-  _pImg="";
-  document.getElementById('app').innerHTML = `<div class="card"><h3>بەرهەمی نوێ</h3>
-    <input id="pName" placeholder="ناوی بەرهەم - بۆ نموونە: کەڵەشێری پیر">
-    <input id="pPrice" type="number" placeholder="نرخ - بۆ نموونە: 4750">
-    <label><input type="checkbox" id="pAvail" checked style="display:inline;width:auto"> بەردەستە</label>
-    <label class="file-label">📷 وێنەی بەرهەم هەڵبژێرە<input type="file" accept="image/*" onchange="fileToBase64(this.files[0], v=>{_pImg=v; document.getElementById('pPrev').src=v; document.getElementById('pPrev').style.display='block'})"></label>
-    <img id="pPrev" class="preview-img">
-    <button onclick="saveProduct('${shopId}')">پاشەکەوتکردن</button>
-    <button class="sec" onclick="openShop('${shopId}')">گەڕانەوە</button></div>`;
+// ===== 2. ئەدمین =====
+function enterAdmin(){
+  let pass=prompt('وشەی نهێنی ئەدمین بنووسە (یەکەم جار: 1234)'); if(pass!=='1234') return alert('وشەی نهێنی هەڵەیە');
+  myRole='admin'; showAdmin();
 }
-function saveProduct(shopId){
-  const name=document.getElementById('pName').value;
-  if(!name||!_pImg) return alert('ناو و وێنە پێویستە');
-  db.collection('products').add({shopId, name, price:document.getElementById('pPrice').value, available:document.getElementById('pAvail').checked, image:_pImg}).then(()=>openShop(shopId));
+function showAdmin(){
+  db.collection('shops').onSnapshot(snap=>{
+    let html=`<button class="sec" onclick="home()">← سەرەتا</button><div class="card"><h3>👑 پانێڵی ئەدمین</h3><button onclick="addShopForm()">+ دووکانی نوێ</button><button class="blue" onclick="showAdminOrders()">📦 تەڵەبەکان ببینە</button></div>`;
+    snap.forEach(d=>{ let s=d.data(); html+=`<div class="card">${s.image?`<img class="shop-img" src="${s.image}">`:''}<b>${s.name}</b> <span class="badge">${s.open?'کراوەیە':'داخراوە'}</span><div style="color:#888;font-size:12px">📍 ${s.location||''}</div><button class="smallBtn orange" onclick="manageProducts('${d.id}','${s.name}')">بەرهەم و نرخەکان</button><button class="smallBtn" onclick="toggleShop('${d.id}',${!s.open})">${s.open?'داخستن':'کردنەوە'}</button><button class="smallBtn danger" onclick="if(confirm('دڵنیایت لە سڕینەوە؟')) db.collection('shops').doc('${d.id}').delete()">سڕینەوە</button></div>`; });
+    document.getElementById('app').innerHTML=html;
+  });
 }
-showShops();
-</script>
-</body>
-</html>
+function toggleShop(id,open){ db.collection('shops').doc(id).update({open}); }
+function addShopForm(){ _sImg=""; document.getElementById('app').innerHTML=`<div class="card"><h3>دووکانی نوێ</h3><input id="shopName" placeholder="ناوی دووکان"><input id="shopLoc" placeholder="شوێن" value="شۆڕش"><label class="file-label">📷 وێنەی دووکان<input type="file" accept="image/*" onchange="fileToBase64(this.files[0],v=>{_sImg=v;document.getElementById('sPrev').src=v;document.getElementById('sPrev').style.display='block'})"></label><img id="sPrev" class="preview-img"><button onclick="saveShop()">پاشەکەوت</button><button class="sec" onclick="showAdmin()">گەڕانەوە</button></div>`; }
+function saveShop(){ let n=document.getElementById('shopName').value; if(!n||!_sImg) return alert('ناو و وێنە پێویستە'); db.collection('shops').add({name:n,location:document.getElementById('shopLoc').value,image:_sImg,open:true,created:Date.now()}).then(()=>showAdmin()); }
+function manageProducts(shopId,shopName){
+  db.collection('products').where('shopId','==',shopId).onSnapshot(snap=>{
+    let html=`<button class="sec" onclick="showAdmin()">← ئەدمین</button><div class="card"><h3>بەرهەمەکانی ${shopName}</h3><button onclick="addProductForm('${shopId}')">+ بەرهەمی نوێ</button></div>`;
+    snap.forEach(d=>{ let p=d.data(); html+=`<div class="card"><div style="display:flex;gap:10px"><img src="${p.image||''}" style="width:70px;height:70px;object-fit:cover;border-radius:10px"><div><b>${p.name}</b><div>نرخ: <b>${p.price}</b> / کیلۆگرام</div><div>${p.available?'✅ بەردەستە':'❌ بەردەست نییە'}</div></div></div><button class="smallBtn orange" onclick="changePrice('${d.id}',${p.price})">💰 گۆڕینی نرخ</button><button class="smallBtn" onclick="db.collection('products').doc('${d.id}').update({available:${!p.available}})">بەردەست / نەماوە</button><button class="smallBtn danger" onclick="if(confirm('بسڕمەوە؟')) db.collection('products').doc('${d.id}').delete()">سڕینەوە</button></div>`; });
+    document.getElementById('app').innerHTML=html;
+  });
+}
+function changePrice(id,oldPrice){ let np=prompt('نرخی نوێ بنووسە:',oldPrice); if(np) db.collection('products').doc(id).update({price:Number(np)}); }
+function addProductForm(shopId){ _pImg=""; document.getElementById('app').innerHTML=`<div class="card"><h3>بەرهەمی نوێ</h3><input id="pName" placeholder="ناوی بەرهەم"><input id="pPrice" type="number" placeholder="نرخ بە کیلۆگرام"><label class="file-label">📷 وێنەی بەرهەم<input type="file" accept="image/*" onchange="fileToBase64(this.files[0],v=>{_pImg=v;document.getElementById('pPrev').src=v;document.getElementById('pPrev').style.display='block'})"></label><img id="pPrev" class="preview-img"><button onclick="saveProduct('${shopId}')">پاشەکەوت</button><button class="sec" onclick="showAdmin()">گەڕانەوە</button></div>`; }
+function saveProduct(shopId){ let n=document.getElementById('pName').value; if(!n||!_
