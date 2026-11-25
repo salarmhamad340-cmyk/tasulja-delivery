@@ -1,48 +1,18 @@
 <!DOCTYPE html>
 <html lang="ckb" dir="rtl">
-<head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>تاسوجە دلیڤەری</title>
-<style>
-*{box-sizing:border-box}body{margin:0;font-family:Tahoma,sans-serif;background:#f4f7f5;direction:rtl}
-header{padding:18px;text-align:center;background:linear-gradient(135deg,#16834a,#0d6338);color:#fff;font-size:22px;font-weight:800;cursor:pointer}
-main{max-width:560px;margin:auto;padding:14px 13px 100px}
-.card{background:#fff;border-radius:19px;padding:17px;margin-bottom:14px;box-shadow:0 5px 20px rgba(0,0,0,.07)}
-button{width:100%;padding:14px;margin:7px 0;border:0;border-radius:13px;background:#16834a;color:#fff;font-weight:700;font-size:15px}
-button.sec{background:#64736a}button.blue{background:#2879bd}button.danger{background:#d94343}button.orange{background:#e99a25;color:#222}button.yellow{background:#f5c542;color:#222}
-button.smallBtn{width:auto;display:inline-block;padding:9px 12px;font-size:12px;margin:3px}
-input,select{width:100%;padding:14px;margin:7px 0;border:1px solid #dbe4de;border-radius:13px;font-size:16px}
-.shop-img{width:100%;height:175px;object-fit:cover;border-radius:15px}
-.role-card{padding:22px 18px;text-align:center;cursor:pointer;border:2px solid #eaf7ef}
-.badge{display:inline-block;padding:5px 11px;border-radius:20px;font-size:11px;background:#e5f6eb;color:#16834a}
-.file-label{display:block;padding:14px;text-align:center;background:#eaf7ef;border:2px dashed #16834a;border-radius:13px;cursor:pointer;font-weight:700;color:#10663a;margin:7px 0}
-.file-label input{display:none}.preview-img{width:100%;height:160px;object-fit:cover;border-radius:13px;display:none;margin:7px 0}
-#toast{position:fixed;top:70px;left:50%;transform:translateX(-50%);background:#111;color:#fff;padding:13px 20px;border-radius:30px;font-size:14px;z-index:999;display:none;max-width:90%;text-align:center}
-#modalBg{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:998;display:none;align-items:flex-end;justify-content:center}
-#modalBox{background:#fff;width:100%;max-width:560px;border-radius:25px 25px 0 0;padding:20px;padding-bottom:30px}
-</style>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>تاسوجە</title>
+<style>body{margin:0;font-family:Tahoma;background:#f4f7f5}header{padding:18px;text-align:center;background:#16834a;color:#fff;font-size:22px;font-weight:800}main{max-width:560px;margin:auto;padding:14px}.card{background:#fff;border-radius:18px;padding:18px;margin-bottom:12px;text-align:center}button{width:100%;padding:14px;border:0;border-radius:12px;background:#16834a;color:#fff;font-weight:700}input{width:100%;padding:14px;border:1px solid #ddd;border-radius:12px;margin:7px 0}</style>
 </head>
 <body>
-<header onclick="secretAdmin()">تاسوجە دلیڤەری</header>
+<header onclick="t++ ; if(t>=5){p=prompt('وشەی نهێنی'); if(p=='1234') alert('ئەدمین کرایەوە')}}">تاسوجە دلیڤەری</header>
 <main id="app"></main>
-<div id="toast"></div>
-<div id="modalBg"><div id="modalBox"></div></div>
 <script>
-let shops=JSON.parse(localStorage.getItem('tasuje_shops')||'[]');
-let products=JSON.parse(localStorage.getItem('tasuje_products')||'[]');
-let orders=JSON.parse(localStorage.getItem('tasuje_orders')||'[]');
-let taxis=JSON.parse(localStorage.getItem('tasuje_taxis')||'[]');
-let cart=[],currentShop=null,_sImg="",_pImg="",currentCat="",tapCount=0;
-let userPhone=localStorage.getItem('tasuje_phone')||"";
-let deliveryName=localStorage.getItem('tasuje_delivery')||"";
-function save(){localStorage.setItem('tasuje_shops',JSON.stringify(shops));localStorage.setItem('tasuje_products',JSON.stringify(products));localStorage.setItem('tasuje_orders',JSON.stringify(orders));localStorage.setItem('tasuje_taxis',JSON.stringify(taxis));}
-function fileToBase64(f,cb){const r=new FileReader();r.onload=e=>cb(e.target.result);r.readAsDataURL(f);}
-function toast(m){let t=document.getElementById('toast');t.innerText=m;t.style.display='block';setTimeout(()=>t.style.display='none',2500);}
-function ask(title,ph,cb){let bg=document.getElementById('modalBg');let box=document.getElementById('modalBox');box.innerHTML=`<h3>${title}</h3><input id="modalInput" placeholder="${ph}"><button onclick="submitModal()">باشە</button><button class="sec" onclick="closeModal()">پاشگەزبوونەوە</button>`;bg.style.display='flex';window._askCb=cb;setTimeout(()=>document.getElementById('modalInput').focus(),100);}
-function submitModal(){let v=document.getElementById('modalInput').value;closeModal();if(window._askCb)window._askCb(v);}
-function closeModal(){document.getElementById('modalBg').style.display='none';}
-function confirmBox(title,cb){let bg=document.getElementById('modalBg');let box=document.getElementById('modalBox');box.innerHTML=`<h3>${title}</h3><button class="danger" onclick="closeModal();window._askCb(true)">بەڵێ</button><button class="sec" onclick="closeModal()">نەخێر</button>`;bg.style.display='flex';window._askCb=cb;}
-function secretAdmin(){tapCount++;if(tapCount>=5){tapCount=0;enterAdmin();}}
-function showLogin(){document.getElementById('app').innerHTML=`<div class="card" style="text-align:center"><div style="font-size:50px">🛵</div><h2>تاسوجە دلیڤەری</h2><p style="color:#666">ژمارە مۆبایلەکەت بنووسە</p></div><div class="card"><input id="phoneInput" placeholder="0770..." value="${userPhone}"><button onclick="sendSMS()">📩 ناردنی کۆد</button><div id="codeBox" style="display:none"><input id="codeInput" placeholder="کۆد - 123456"><button class="blue" onclick="verifyCode()">پشتڕاستکردنەوە</button></div></div>`;}
-function sendSMS(){let p=document.getElementById('phoneInput').value;if(!p)return toast('تکایە ژمارە بنووسە');userPhone=p;localStorage.setItem('tasuje_phone',p);document.getElementById('codeBox').style.display='block';toast('کۆد نێردرا ✅');}
-function verifyCode(){if(document.getElementById('codeInput').value=='123456'){localStorage.setItem('tasuje_logged','yes');home();toast('بەخێربێیت 👋');}else toast('کۆدەکە ه
+let t=0;
+function login(){document.getElementById('app').innerHTML=`<div class="card"><h2>تاسوجە 🛵</h2><input id="ph" placeholder="0770..."><button onclick="showCode()">ناردنی کۆد</button><div id="c" style="display:none"><input id="cd" placeholder="123456"><button onclick="go()">چوونە ژوورەوە</button></div></div>`}
+function showCode(){document.getElementById('c').style.display='block';alert('کۆدەکە: 123456')}
+function go(){if(document.getElementById('cd').value=='123456'){home()}else{alert('کۆد هەڵەیە')}}
+function home(){document.getElementById('app').innerHTML=`<div class="card" onclick="alert('تەکسی')"><div style="font-size:40px">🚕</div><b>تەکسی تاسوجە</b></div><div class="card" onclick="alert('خواردەمەنی')"><div style="font-size:40px">🍔</div><b>خواردەمەنی</b></div><div class="card" onclick="alert('دووکانەکان')"><div style="font-size:40px">🛒</div><b>دووکانەکانی تر</b></div><button onclick="login()">دەرچوون</button>`}
+login();
+</script>
+</body>
+</html>
